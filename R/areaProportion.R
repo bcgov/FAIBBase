@@ -16,15 +16,11 @@
 #'                             Default is \code{list(c(-50, 50), c(50, 50), c(50, -50), c(-50, -50))},
 #'                             which represent a 10000 m2 base area.
 #'
-#' @return a data table that has five columns, plotNumber, treeNumber, Year, IntraH and InterH
+#' @return A ratio of overlapped area to full circular area.
 #'
 #' @importFrom sp Polygons SpatialPolygons
 #' @importFrom raster intersect
 #' @importFrom rgeos gArea
-#'
-#' @note no note
-#'
-#' @seealso no
 #'
 #' @export
 #' @docType methods

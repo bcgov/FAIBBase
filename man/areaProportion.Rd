@@ -29,17 +29,11 @@ Default is \code{list(c(-50, 50), c(50, 50), c(50, -50), c(-50, -50))},
 which represent a 10000 m2 base area.}
 }
 \value{
-a data table that has five columns, plotNumber, treeNumber, Year, IntraH and InterH
+A ratio of overlapped area to full circular area.
 }
 \description{
 The correction index is calculated using proportion of overlapped area
 to full circular area.
-}
-\note{
-no note
-}
-\seealso{
-no
 }
 \author{
 Yong Luo

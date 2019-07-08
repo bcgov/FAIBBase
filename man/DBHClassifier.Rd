@@ -3,22 +3,9 @@
 \docType{methods}
 \name{DBHClassifier}
 \alias{DBHClassifier}
-\alias{DBHClassifier,numeric,numeric,numeric-method}
-\alias{DBHClassifier,numeric,missing,numeric-method}
-\alias{DBHClassifier,numeric,numeric,missing-method}
-\alias{DBHClassifier,numeric,missing,missing-method}
 \title{Derive DBH class from DBH}
 \usage{
-DBHClassifier(DBH, classInterval, maxDBH)
-
-\S4method{DBHClassifier}{numeric,numeric,numeric}(DBH, classInterval,
-  maxDBH)
-
-\S4method{DBHClassifier}{numeric,missing,numeric}(DBH, maxDBH)
-
-\S4method{DBHClassifier}{numeric,numeric,missing}(DBH, classInterval)
-
-\S4method{DBHClassifier}{numeric,missing,missing}(DBH)
+DBHClassifier(DBH, classInterval = 5, maxDBH = 175)
 }
 \arguments{
 \item{DBH}{numeric, Tree DBH.}

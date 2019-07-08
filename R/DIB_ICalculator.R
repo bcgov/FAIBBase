@@ -252,12 +252,9 @@ setMethod(
           DIB_I <- tempTable[order(obsIndex), ]$DIB_I
 
         }
-
       }
     }
-
     return(DIB_I)
-
   })
 
 

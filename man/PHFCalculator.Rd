@@ -3,19 +3,9 @@
 \docType{methods}
 \name{PHFCalculator}
 \alias{PHFCalculator}
-\alias{PHFCalculator,character,numeric,numeric,numeric,numeric-method}
-\alias{PHFCalculator,character,numeric,numeric,numeric,missing-method}
 \title{Calculate tree per ha factor for both fix and variable area plot}
 \usage{
 PHFCalculator(sampleType, blowUp, treeWeight, plotWeight, treeBasalArea)
-
-
-  \S4method{PHFCalculator}{character,numeric,numeric,numeric,numeric}(sampleType,
-  blowUp, treeWeight, plotWeight, treeBasalArea)
-
-
-  \S4method{PHFCalculator}{character,numeric,numeric,numeric,missing}(sampleType,
-  blowUp, treeWeight, plotWeight)
 }
 \arguments{
 \item{sampleType}{character, Specifies how the plot is sampled among fixed area plot or variable area plot,
