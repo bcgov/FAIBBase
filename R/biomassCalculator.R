@@ -18,6 +18,7 @@
 #' @return Biomass (kg) and missedSpecies list that was not calculated.
 #'
 #' @importFrom data.table data.table ':='
+#' @export
 #'
 #' @docType methods
 #' @rdname biomassCalculator
