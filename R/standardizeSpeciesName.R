@@ -15,6 +15,7 @@
 #'          the original species table can not be found according to manual
 #'
 #' @importFrom data.table ':='
+#' @export
 #'
 #' @note no note
 #'
