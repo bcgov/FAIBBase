@@ -22,27 +22,36 @@
 #'
 #' @importFrom data.table ':=' data.table
 #' @importFrom dplyr '%>%'
-#' @importFrom raster raster mask crop stack extract getValues
+#' @importFrom raster raster mask crop stack extract getValues crs
 #' @importFrom sp spTransform SpatialPointsDataFrame coordinates
+#' @export
 #'
 #' @rdname SIInBC
 #' @author Yong Luo
 SIInBC <- function(SIMapPath, spatialCoverage,
                    species = "all", returnClass = "table"){
+  allspecies <- c("At", "Ba", "Bg", "Bl", "Cw", "Dr", "Ep",
+                  "Fd", "Hm", "Hw", "Lt", "Lw", "Pa", "Pl",
+                  "Pw", "Py", "Sb", "Se", "Ss", "Sw", "Sx",
+                  "Yc") ## should have 22 species
   if(length(species) == 1){
     if(toupper(species) == "ALL"){
-      species <- c("At", "Ba", "Bg", "Bl", "Cw", "Dr", "Ep",
-                   "Fd", "Hm", "Hw", "Lt", "Lw", "Pa", "Pl",
-                   "Pw", "Py", "Sb", "Se", "Ss", "Sw", "Sx",
-                   "Yc") ## should have 22 species
+      species <- allspecies
     }
   }
 
   if(length(species) > 1){
-    for(indispecies in species){
+    speciesValid <- species[toupper(species) %in% toupper(allspecies)]
+    if(length(species[!(toupper(species) %in% toupper(allspecies))]) > 0){
+      warning("Species: ",
+              paste0(species[!(toupper(species) %in% toupper(allspecies))], collapse = ", "),
+              " are not valid species.")
+    }
+
+    for(indispecies in speciesValid){
       indispeciesmap <- raster::raster(file.path(SIMapPath,
                                                  paste0("Site_Prod_", indispecies, ".tif")))
-      if(indispecies == species[1]){
+      if(indispecies == speciesValid[1]){
         speciesmaps <- stack(indispeciesmap)
       } else {
         speciesmaps <- stack(speciesmaps, indispeciesmap)
@@ -53,7 +62,7 @@ SIInBC <- function(SIMapPath, spatialCoverage,
                                             paste0("Site_Prod_", species, ".tif")))
   }
   spatialCoverage <- sp::spTransform(spatialCoverage,
-                                     CRSobj = crs(speciesmaps))
+                                     CRSobj = raster::crs(speciesmaps))
   if(class(spatialCoverage) %in% c("SpatialPolygons",
                                    "SpatialPolygonsDataFrame")){
     speciesSpatialMaps <- raster::crop(speciesmaps,
@@ -67,7 +76,7 @@ SIInBC <- function(SIMapPath, spatialCoverage,
                           xmx = xmax(speciesSpatialMaps),
                           ymn = ymin(speciesSpatialMaps),
                           ymx = ymax(speciesSpatialMaps),
-                          crs = crs(speciesSpatialMaps),
+                          crs = raster::crs(speciesSpatialMaps),
                           vals = rep(1, ncell(speciesSpatialMaps)))
       refraster <- raster::mask(refraster, spatialCoverage)
       gc()
@@ -75,10 +84,10 @@ SIInBC <- function(SIMapPath, spatialCoverage,
       outputtable[, pointID := 1:nrow(outputtable)]
       newspatialpoints <- SpatialPointsDataFrame(coords = outputtable[,.(x, y)],
                                                  data = outputtable,
-                                                 proj4string = crs(speciesSpatialMaps))
+                                                 proj4string = raster::crs(speciesSpatialMaps))
 
       newspatialpoints <- spTransform(newspatialpoints,
-                                      CRSobj = crs("+proj=aea +lat_1=50 +lat_2=58.5 +lat_0=45 +lon_0=-126 +x_0=1000000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs"))
+                                      CRSobj = raster::crs("+proj=aea +lat_1=50 +lat_2=58.5 +lat_0=45 +lon_0=-126 +x_0=1000000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs"))
       gc()
       outputtable <- data.table::data.table(data.frame(coordinates(newspatialpoints)))
       names(outputtable) <- c("ALBERS_X", "ALBERS_Y")
@@ -103,9 +112,9 @@ SIInBC <- function(SIMapPath, spatialCoverage,
                                            "SpatialPointsDataFrame",
                                            "SpatialLines")){
     siteindex <- data.table(data.frame(raster::extract(speciesmaps, spatialCoverage)))
-    names(siteindex) <- paste0(species, "_SI")
+    names(siteindex) <- paste0(speciesValid, "_SI")
     spatialCoverage <- spTransform(spatialCoverage,
-                                   CRSobj = crs("+proj=aea +lat_1=50 +lat_2=58.5 +lat_0=45 +lon_0=-126 +x_0=1000000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs"))
+                                   CRSobj = raster::crs("+proj=aea +lat_1=50 +lat_2=58.5 +lat_0=45 +lon_0=-126 +x_0=1000000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs"))
     locations <- data.table(data.frame(coordinates(spatialCoverage)))
     names(locations) <- c("ALBERS_X", "ALBERS_Y")
     if(class(spatialCoverage) %in% c("SpatialPoints",
@@ -124,7 +133,7 @@ SIInBC <- function(SIMapPath, spatialCoverage,
     } else if (returnClass == "sp"){
       finalmap <- SpatialPointsDataFrame(coords = siteindex[,.(ALBERS_X, ALBERS_Y)],
                                          data = siteindex,
-                                         proj4string = crs("+proj=aea +lat_1=50 +lat_2=58.5 +lat_0=45 +lon_0=-126 +x_0=1000000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs"))
+                                         proj4string = raster::crs("+proj=aea +lat_1=50 +lat_2=58.5 +lat_0=45 +lon_0=-126 +x_0=1000000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs"))
       return(finalmap)
     } else {
       stop("Please specify returnClass correctly.")
