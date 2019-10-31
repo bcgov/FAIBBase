@@ -133,6 +133,7 @@ setMethod(
 #' @return DIB_I diameter inside bark at height_I
 #'
 #' @importFrom data.table ':=' setnames setkey
+#' @export
 #'
 #' @note This function is inside of the VRIVolTree function
 #'
