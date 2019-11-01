@@ -14,10 +14,10 @@ checkSize_remeas(subjectID, measNo, size, change = "increase",
 
 \item{size}{numeric, Measurement of an attribute.}
 
-\item{change}{character, Change direction from \code{increase}, \code{decrease} or \code{none}.
+\item{change}{character, Change direction either from \code{increase} or \code{decrease}.
 Default is \code{increase}.}
 
-\item{tolerance}{numeric, Tolerance value to allow measurement error, which is a absolute value.
+\item{tolerance}{numeric, Tolerance value (exclusive) to allow measurement error, which is a absolute value.
 If the change is \code{increase}, the change from current measurement to
 last measurement will be compared to the negative tolerance value,
 and vice versa. Default is \code{0} for zero tolerance.}

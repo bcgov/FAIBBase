@@ -5,16 +5,16 @@
 #' @param subjectID character, Specifies subject ID, such as a tree id.
 #' @param measNo numeric, Measurement number with bigger value indicates a later measurement.
 #' @param size numeric, Measurement of an attribute.
-#' @param change character, Change direction from \code{increase}, \code{decrease} or \code{none}.
+#' @param change character, Change direction either from \code{increase} or \code{decrease}.
 #'                          Default is \code{increase}.
-#' @param tolerance numeric, Tolerance value to allow measurement error, which is a absolute value.
+#' @param tolerance numeric, Tolerance value (exclusive) to allow measurement error, which is a absolute value.
 #'                           If the change is \code{increase}, the change from current measurement to
 #'                           last measurement will be compared to the negative tolerance value,
 #'                           and vice versa. Default is \code{0} for zero tolerance.
 #' @return A data table that contains pass information. TRUE indicates pass, while FALSE indicates
 #'         failure.
 #' @importFrom data.table ':=' data.table copy
-#' @importFrom fpCompare %<=% %<<%
+#' @importFrom fpCompare %<=% %<<% %>=%
 #' @author Yong Luo
 #' @export
 #' @rdname checkSize_remeas
@@ -23,13 +23,13 @@ checkSize_remeas <- function(subjectID,
                              size,
                              change = "increase",
                              tolerance = 0){
-  if(!change %in% c("increase", "decrease", "none")){
-    stop("change must be correctly defined from increase, decrease or none.")
+  if(!change %in% c("increase", "decrease")){
+    stop("change must be correctly defined from increase or decrease.")
   }
   if(tolerance %<<% 0){
     stop("tolerance must be defined as a non-negative value.")
   }
-  if(length(is.na(size)) > 0){
+  if(length(size[is.na(size)]) > 0){
     stop("size can not have missing value.")
   }
   thedata <- data.table(subjectID = subjectID,
@@ -48,13 +48,9 @@ checkSize_remeas <- function(subjectID,
   thedata[, size_dif := Fin_size - size]
   thedata[, pass := TRUE]
   if(change == "increase"){
-  thedata[size_dif %<=% (-tolerance), pass := FALSE]
+    thedata[size_dif %<=% (-tolerance), pass := FALSE]
   } else if(change == "decrease"){
-  thedata[size_dif %>=% tolerance, pass := FALSE]
-  } else if(change == "none"){
-  thedata[size_dif %>=% tolerance |
-            size_dif %<=% (-tolerance),
-          pass := FALSE]
+    thedata[size_dif %>=% tolerance, pass := FALSE]
   }
   thedata[, measNo := Fin_measNo]
   orgdata <- merge(orgdata, thedata[,.(subjectID, measNo, pass)],
