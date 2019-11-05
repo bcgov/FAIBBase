@@ -37,7 +37,7 @@ checkSize_remeas <- function(subjectID,
                         size = size)
   orgdata <- data.table::copy(thedata)
   if(nrow(thedata) != nrow(unique(thedata, by = c("subjectID", "measNo")))){
-    stop("Multiple sizes on one measurement number, please correct it before another run.")
+    stop("Multiple sizes were recorded for one subject/measurement, please check the duplicates.")
   }
   thedata <- thedata[order(subjectID, measNo),]
   thedata[, obsid := 1:length(measNo), by = "subjectID"]
