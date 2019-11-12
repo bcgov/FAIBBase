@@ -11,7 +11,7 @@
 #' @return A data table that contains pass information. TRUE indicates pass, while FALSE indicates
 #'         failure.
 #'
-#' @importFrom data.table ':=' data.table copy
+#' @importFrom data.table ':=' data.table copy rbindlist
 #' @author Yong Luo
 #' @export
 #' @rdname checkLD_remeas
