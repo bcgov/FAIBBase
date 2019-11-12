@@ -62,21 +62,27 @@ checkMissing_remeas <- function(subjectID, measNo, intendedMeasNo,
                         lastMeasNo = max(measNo),
                         lastDead = max(LDStatus)),
                      by = "subjectID"]
-  twoends[lastDead != 1, lastMeasNo := max(intendedMeasNo)]
+
+  twoends[, lastMeasNo_intend := lastMeasNo]
+  twoends[lastDead != 1, lastMeasNo_intend := max(intendedMeasNo)]
 
   fullmeas <- merge(fullmeas, twoends,
                     by = "subjectID", all.x = TRUE)
   fullmeas <- fullmeas[firstMeasNo <= intendedMeasNo &
-                         lastMeasNo >= intendedMeasNo,]
+                         lastMeasNo_intend >= intendedMeasNo,]
   fullmeas[, measNo := intendedMeasNo]
   fullmeas <- merge(fullmeas, thedata[,.(subjectID, measNo, obs = 1, LDStatus)],
                     by = c("subjectID", "measNo"), all.x = TRUE)
   fullmeas[,':='(totaloobs = sum(obs, na.rm = TRUE),
                  intendobs = length(obs)),
            by = "subjectID"]
-  results <- rbind(unique(fullmeas[totaloobs == intendobs,.(subjectID, pass = TRUE, missingMeasNo = NA)],
+  fullmeas[is.na(obs) & intendedMeasNo > lastMeasNo, missingReason := "missing tail"]
+  fullmeas[is.na(obs) & is.na(missingReason), missingReason := "missing middle"]
+  results <- rbind(unique(fullmeas[totaloobs == intendobs,
+                                   .(subjectID, pass = TRUE, missingMeasNo = NA, missingReason)],
                           by = "subjectID"),
-                   fullmeas[is.na(obs),.(subjectID, pass = FALSE, missingMeasNo = measNo)])
+                   fullmeas[is.na(obs),
+                            .(subjectID, pass = FALSE, missingMeasNo = measNo, missingReason)])
   results <- results[order(subjectID, missingMeasNo),]
   return(results)
 }

@@ -29,7 +29,8 @@ test_that("checkMissing_remeas.R: the missing measurements are not correctly che
   expect_equal(output,
                data.table(subjectID = c("1", "2"),
                           pass = TRUE,
-                          missingMeasNo = as.numeric(NA)))
+                          missingMeasNo = as.numeric(NA),
+                          missingReason = as.character(NA)))
   rm(output)
   # check the pass scenario with dead mode on
   thedata <- rbind(data.table(treeid = "1",
@@ -56,7 +57,8 @@ test_that("checkMissing_remeas.R: the missing measurements are not correctly che
   expect_equal(output,
                data.table(subjectID = c("1", "2", "3", "4", "5"),
                           pass = TRUE,
-                          missingMeasNo = as.numeric(NA)))
+                          missingMeasNo = as.numeric(NA),
+                          missingReason = as.character(NA)))
   rm(output)
 
 
@@ -69,15 +71,17 @@ test_that("checkMissing_remeas.R: the missing measurements are not correctly che
   expect_equal(output,
                data.table(subjectID = c("1", "2", "2", "3", "4", "5"),
                           pass = c(TRUE, FALSE, FALSE, TRUE, TRUE, FALSE),
-                          missingMeasNo = c(NA, 4, 5, NA, NA, 5)))
-  #    subjectID  pass missingMeasNo
-  # 1:         1  TRUE            NA
-  # 2:         2 FALSE             4
-  # 3:         2 FALSE             5
-  # 4:         3  TRUE            NA
-  # 5:         4  TRUE            NA
-  # 6:         5 FALSE             5
-  rm(output)
+                          missingMeasNo = c(NA, 4, 5, NA, NA, 5),
+                          missingReason = c(NA, "missing tail", "missing tail", NA,
+                                            NA, "missing tail")))
+  #    subjectID  pass missingMeasNo missingReason
+  # 1:         1  TRUE            NA          <NA>
+  # 2:         2 FALSE             4  missing tail
+  # 3:         2 FALSE             5  missing tail
+  # 4:         3  TRUE            NA          <NA>
+  # 5:         4  TRUE            NA          <NA>
+  # 6:         5 FALSE             5  missing tail
+    rm(output)
 
 
 
@@ -93,7 +97,8 @@ test_that("checkMissing_remeas.R: the missing measurements are not correctly che
   expect_equal(output1,
                data.table(subjectID = c("1", "2", "3", "4", "5"),
                           pass = c(FALSE, FALSE, FALSE, TRUE, TRUE),
-                          missingMeasNo = c(3, 2, 4, NA, NA)))
+                          missingMeasNo = c(3, 2, 4, NA, NA),
+                          missingReason = c(rep("missing middle", 3), rep(NA, 2))))
   thedata1[, ld := as.character(ld)]
   thedata1[treeid == 1 & measures == 2, ld := "test1"]
   thedata1[treeid == 2 & measures == 1, ld := "test2"]
@@ -107,16 +112,17 @@ test_that("checkMissing_remeas.R: the missing measurements are not correctly che
   rm(output1, output2, thedata1)
 
   ## check missing middle measurements with dead mode off
-  thedata <- thedata[treeid == "1" & measures != 4,] # missing 4th measurement
+  thedata <- thedata[treeid == "1" & measures != 2,] # missing 2th measurement
+  thedata <- thedata[measures != 5,] # missing 5th measurement
   output <- checkMissing_remeas(subjectID = thedata$treeid,
                                 measNo =  thedata$measures,
                                 intendedMeasNo = 1:5,
                                 deadCode = NULL)
   expect_equal(output,
-               data.table(subjectID = c("1"),
-                          pass = c(FALSE),
-                          missingMeasNo = 4))
+               data.table(subjectID = "1",
+                          pass = c(FALSE, FALSE),
+                          missingMeasNo = c(2, 5),
+                          missingReason = c("missing middle", "missing tail")))
 
   rm(output)
-
 })
