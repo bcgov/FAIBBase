@@ -112,6 +112,7 @@ test_that("checkMissing_remeas.R: the missing measurements are not correctly che
   rm(output1, output2, thedata1)
 
   ## check missing middle measurements with dead mode off
+  ## check a tree have both missing middle and missing tail
   thedata <- thedata[treeid == "1" & measures != 2,] # missing 2th measurement
   thedata <- thedata[measures != 5,] # missing 5th measurement
   output <- checkMissing_remeas(subjectID = thedata$treeid,
