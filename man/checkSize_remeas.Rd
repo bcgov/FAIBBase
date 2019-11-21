@@ -4,20 +4,26 @@
 \alias{checkSize_remeas}
 \title{Check the size change of a remeasured subject}
 \usage{
-checkSize_remeas(subjectID, measNo, size, change = "increase",
-  tolerance = 0)
+checkSize_remeas(subjectID, measTime, size, change = "increase",
+  maxChangeRate = NULL, tolerance = 0)
 }
 \arguments{
 \item{subjectID}{character, Specifies subject ID, such as a tree id.}
 
-\item{measNo}{numeric, Measurement number with bigger value indicates a later measurement.}
+\item{measTime}{numeric, Measurement number with bigger value indicates a later measurement.}
 
 \item{size}{numeric, Measurement of an attribute.}
 
 \item{change}{character, Change direction either from \code{increase} or \code{decrease}.
 Default is \code{increase}.}
 
-\item{tolerance}{numeric, Tolerance value (exclusive) to allow measurement error, which is a absolute value.
+\item{maxChangeRate}{numeric, It determines the maximum change rate. If the change rate from previous
+to current measurement exceeds the maximum change rate, then the pass of current
+measurement will be flagged as \code{FALSE}. If missing, this term is set
+as \code{NULL}.}
+
+\item{tolerance}{numeric, Tolerance value (exclusive) to allow measurement error,
+which is a absolute value.
 If the change is \code{increase}, the change from current measurement to
 last measurement will be compared to the negative tolerance value,
 and vice versa. Default is \code{0} for zero tolerance.}
