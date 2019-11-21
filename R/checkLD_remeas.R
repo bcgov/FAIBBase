@@ -32,21 +32,25 @@ checkLD_remeas <- function(subjectID, measNo, LDStatus,
   processdata_live <- processdata[ldtotal == 0,]
   processdata_live[, pass := TRUE]
   processdata <- processdata[ldtotal != 0,]
-  processdata_dead <- processdata[LDStatus == deadCode,]
-  processdata_dead[, ':='(firstdead = min(measNo)),
-                   by = "subjectID"]
-  processdata_firstdead <- processdata_dead[measNo == firstdead,
-                                            .(subjectID, firstdead = measNo)]
-  processdata <- merge(processdata, processdata_firstdead,
-                       by = "subjectID", all.x = TRUE)
-  processdata_dead <- processdata[measNo >= firstdead,]
-  processdata_dead[, ':='(totaldead = sum(newld),
-                          totallength = length(newld)),
-                   by = "subjectID"]
-  processdata_dead[totaldead != totallength, pass := FALSE]
-  processdata_dead[is.na(pass), pass := TRUE]
-  results <- unique(rbindlist(list(processdata_live[,.(subjectID, pass)],
-                                   processdata_dead[,.(subjectID, pass)])),
-                    by = "subjectID")
+  if(nrow(processdata[ldtotal != 0,]) > 0){
+    processdata_dead <- processdata[LDStatus == deadCode,]
+    processdata_dead[, ':='(firstdead = min(measNo)),
+                     by = "subjectID"]
+    processdata_firstdead <- processdata_dead[measNo == firstdead,
+                                              .(subjectID, firstdead = measNo)]
+    processdata <- merge(processdata, processdata_firstdead,
+                         by = "subjectID", all.x = TRUE)
+    processdata_dead <- processdata[measNo >= firstdead,]
+    processdata_dead[, ':='(totaldead = sum(newld),
+                            totallength = length(newld)),
+                     by = "subjectID"]
+    processdata_dead[totaldead != totallength, pass := FALSE]
+    processdata_dead[is.na(pass), pass := TRUE]
+    results <- unique(rbindlist(list(processdata_live[,.(subjectID, pass)],
+                                     processdata_dead[,.(subjectID, pass)])),
+                      by = "subjectID")
+  } else {
+    results <- processdata_live[,.(subjectID, pass)]
+  }
   return(results)
 }
