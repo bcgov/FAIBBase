@@ -44,10 +44,10 @@ biomassCalculator <- function(species, DBH, heightIncluded = TRUE,
   if(paperSource != "Lambert2005" & paperSource != "Ung2008"){
     stop("Please select the correct paperSource Lambert2005 or Ung2008")
   }
-
   # the below parameters are from Table 3 in Lambert 2005
   if(!heightIncluded){
-    tempdatatable <- data.table::data.table(species = species, DBH = DBH)
+    tempdatatable <- data.table::data.table(species = species, DBH = DBH,
+                                            biomass = as.numeric(NA))
     uniqueSpecies <- unique(species)
     for (individualSpecies in uniqueSpecies){
       if(individualSpecies == "alpine fir"){
@@ -718,30 +718,31 @@ biomassCalculator <- function(species, DBH, heightIncluded = TRUE,
                         foliage1*DBH^foliage2+
                         branches1*DBH^branches2]
       } else {
-        if(paperSource == "Lambert2005"){
-          wood1 <- 0.0787
-          wood2 <- 2.3702
-          bark1 <- 0.0185
-          bark2 <- 2.2159
-          branches1 <- 0.0230
-          branches2 <- 2.2678
-          foliage1 <- 0.0767
-          foliage2 <- 1.5720
-        } else {
-          wood1 <- 0.0741
-          wood2 <- 2.3875
-          bark1 <- 0.0182
-          bark2 <- 2.2181
-          branches1 <- 0.0227
-          branches2 <- 2.2797
-          foliage1 <- 0.0764
-          foliage2 <- 1.5861
-        }
-        tempdatatable[is.na(biomass),
-                      biomass := wood1*DBH^wood2+
-                        bark1*DBH^bark2+
-                        foliage1*DBH^foliage2+
-                        branches1*DBH^branches2]
+        # cat(individualSpecies, "\n")
+        # if(paperSource == "Lambert2005"){
+        #   wood1 <- 0.0787
+        #   wood2 <- 2.3702
+        #   bark1 <- 0.0185
+        #   bark2 <- 2.2159
+        #   branches1 <- 0.0230
+        #   branches2 <- 2.2678
+        #   foliage1 <- 0.0767
+        #   foliage2 <- 1.5720
+        # } else {
+        #   wood1 <- 0.0741
+        #   wood2 <- 2.3875
+        #   bark1 <- 0.0182
+        #   bark2 <- 2.2181
+        #   branches1 <- 0.0227
+        #   branches2 <- 2.2797
+        #   foliage1 <- 0.0764
+        #   foliage2 <- 1.5861
+        # }
+        # tempdatatable[species == individualSpecies,
+        #               biomass := wood1*DBH^wood2+
+        #                 bark1*DBH^bark2+
+        #                 foliage1*DBH^foliage2+
+        #                 branches1*DBH^branches2]
       }
     }
 
@@ -1658,7 +1659,7 @@ biomassCalculator <- function(species, DBH, heightIncluded = TRUE,
           foliage2 <- 2.3289
           foliage3 <- -1.1316
         }
-        tempdatatable[is.na(biomass),
+        tempdatatable[species == individualSpecies,
                       biomass := wood1*(DBH^wood2)*(height^wood3)+
                         bark1*(DBH^bark2)*(height^bark3)+
                         foliage1*(DBH^foliage2)*(height^foliage3)+
