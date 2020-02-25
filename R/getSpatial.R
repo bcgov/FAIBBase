@@ -8,16 +8,16 @@
 #' @param northing integer, UTM northing.
 #' @param easting integer, UTM easting.
 #' @param spatialAttribute character, specifies which spatial attribute to be obtained. Must be one of
-#'                         "BEC", "TSA" or "FIZ". The spatial attribute \code{BEC} and \code{TSA} are
+#'                         "BEC", "TSA", "FIZ", "TFL" and "OWNERSHIP", regardless of lower or upper cases.
+#'                         The spatial attribute \code{BEC} and \code{TSA} are
 #'                         available at \code{\link[bcmaps]{bec}} and \code{\link[bcmaps]{tsa}}.
 #'                         Therefore, for these attributes, \code{mapPath}, \code{mapName} and
-#'                         \code{mapFormat} should not be specified. Since \code{FIZ} map is not available
-#'                         neither online nor from any R package. The below arguements must be specified.
-#' @param mapPath character, Path to map, must be specified when deriving \code{FIZ}.
-#' @param mapName character, Map name of fiz, must be specified when deriving \code{FIZ}.
-#' @param mapFormat character, Map format of fiz, either shp or gdb, must be specified when deriving \code{FIZ}.
-#'
-#'
+#'                         \code{mapFormat} should not be specified. Since \code{FIZ}, \code{TFL} and
+#'                         \code{OWNERSHIP} map is not available from any R package.
+#'                         The below arguements must be specified.
+#' @param mapPath character, Path to map.
+#' @param mapName character, Map name of the map.
+#' @param mapFormat character, Map format of the map.
 #'
 #'
 #' @return Depends on what spatial attribute a function derives.
@@ -34,8 +34,18 @@
 #'         }
 #'         For \code{FIZ}, a table that contains:
 #'         \itemize{
-#'         \item{fiz} {fiz.}
+#'         \item{fiz} {fiz forest inventory zone.}
 #'         }
+#'         For \code{TFL}, a table that contains:
+#'         \itemize{
+#'         \item{tfl} {tfl timber farm licenses.}
+#'         }
+#'         For \code{OWNERSHIP}, a table that contains:
+#'         \itemize{
+#'         \item{owner} {owner of land.}
+#'         \item{schedule} {schedule.}
+#'         }
+#'
 #'
 #'
 #'
@@ -65,7 +75,7 @@ getSpatial <- function(pointID, zone, northing, easting,
                             easting = easting,
                             class = "sp")
   spatialAttribute <- toupper(spatialAttribute)
-  if(spatialAttribute %in% c("BEC", "TSA", "FIZ")){
+  if(spatialAttribute %in% c("BEC", "TSA", "FIZ", "TFL", "OWNERSHIP")){
     if(spatialAttribute == "BEC"){
       spatialMap <- bcmaps::bec(class = "sp")
     } else if (spatialAttribute == "TSA") {
@@ -76,6 +86,12 @@ getSpatial <- function(pointID, zone, northing, easting,
       }
       gdbpath <- file.path(mapPath, paste(mapName, ".", mapFormat, sep = ""))
       spatialMap <- rgdal::readOGR(dsn = gdbpath, layer = "forest_inventory_zone")
+    } else if (spatialAttribute == "TFL"){
+      gdbpath <- file.path(mapPath, paste(mapName, ".", mapFormat, sep = ""))
+      spatialMap <- rgdal::readOGR(dsn = gdbpath, layer = "TFL_BusinessView_March2018")
+    } else if (spatialAttribute == "OWNERSHIP"){
+      gdbpath <- file.path(mapPath, paste(mapName, ".", mapFormat, sep = ""))
+      spatialMap <- rgdal::readOGR(dsn = gdbpath, layer = "dissolve_multi")
     }
     if(!sp::identicalCRS(spatialMap, pointmap)){
       pointmap <- suppressWarnings(sp::spTransform(pointmap, crs(spatialMap)))
@@ -114,14 +130,23 @@ getSpatial <- function(pointID, zone, northing, easting,
       pointmap_data <- pointmap_data[!duplicated(pointmap_data),]
       pointmap_data[, tempID := as.numeric(tempID)]
       pointmap_data <- pointmap_data[order(tempID), .(pointID, FIZ)]
-    } else {
+    } else if (spatialAttribute == "TFL"){
       pointmap_data <- pointmap_data[,.(tempID = point_ID,
-                                        FIZ)]
+                                        TFL = FOREST_FIL)]
       pointmap_data <- merge(connectionTable, pointmap_data,
                              by = "tempID", all.x = TRUE)
       pointmap_data <- pointmap_data[!duplicated(pointmap_data),]
       pointmap_data[, tempID := as.numeric(tempID)]
-      pointmap_data <- pointmap_data[order(tempID), .(pointID, FIZ)]
+      pointmap_data <- pointmap_data[order(tempID), .(pointID, TFL)]
+    } else if (spatialAttribute == "OWNERSHIP"){
+      pointmap_data <- pointmap_data[,.(tempID = point_ID,
+                                        OWNER = OWN,
+                                        SCHEDULE)]
+      pointmap_data <- merge(connectionTable, pointmap_data,
+                             by = "tempID", all.x = TRUE)
+      pointmap_data <- pointmap_data[!duplicated(pointmap_data),]
+      pointmap_data[, tempID := as.numeric(tempID)]
+      pointmap_data <- pointmap_data[order(tempID), .(pointID, OWNER, SCHEDULE)]
     }
     return(pointmap_data)
   } else {

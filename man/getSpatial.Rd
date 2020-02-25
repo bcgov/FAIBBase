@@ -18,17 +18,19 @@ getSpatial(pointID, zone, northing, easting, spatialAttribute = "all",
 \item{easting}{integer, UTM easting.}
 
 \item{spatialAttribute}{character, specifies which spatial attribute to be obtained. Must be one of
-"BEC", "TSA" or "FIZ". The spatial attribute \code{BEC} and \code{TSA} are
+"BEC", "TSA", "FIZ", "TFL" and "OWNERSHIP", regardless of lower or upper cases.
+The spatial attribute \code{BEC} and \code{TSA} are
 available at \code{\link[bcmaps]{bec}} and \code{\link[bcmaps]{tsa}}.
 Therefore, for these attributes, \code{mapPath}, \code{mapName} and
-\code{mapFormat} should not be specified. Since \code{FIZ} map is not available
-neither online nor from any R package. The below arguements must be specified.}
+\code{mapFormat} should not be specified. Since \code{FIZ}, \code{TFL} and
+\code{OWNERSHIP} map is not available from any R package.
+The below arguements must be specified.}
 
-\item{mapPath}{character, Path to map, must be specified when deriving \code{FIZ}.}
+\item{mapPath}{character, Path to map.}
 
-\item{mapName}{character, Map name of fiz, must be specified when deriving \code{FIZ}.}
+\item{mapName}{character, Map name of the map.}
 
-\item{mapFormat}{character, Map format of fiz, either shp or gdb, must be specified when deriving \code{FIZ}.}
+\item{mapFormat}{character, Map format of the map.}
 }
 \value{
 Depends on what spatial attribute a function derives.
@@ -45,7 +47,16 @@ For \code{TSA}, a table that contains:
 }
 For \code{FIZ}, a table that contains:
 \itemize{
-\item{fiz} {fiz.}
+\item{fiz} {fiz forest inventory zone.}
+}
+For \code{TFL}, a table that contains:
+\itemize{
+\item{tfl} {tfl timber farm licenses.}
+}
+For \code{OWNERSHIP}, a table that contains:
+\itemize{
+\item{owner} {owner of land.}
+\item{schedule} {schedule.}
 }
 }
 \description{
