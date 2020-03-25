@@ -4,8 +4,13 @@
 \alias{checkMissing_remeas}
 \title{Check the missing measurements in repeatedly measured subject against intended measurements}
 \usage{
-checkMissing_remeas(subjectID, measNo, intendedMeasNo, deadCode = NULL,
-  LDStatus)
+checkMissing_remeas(
+  subjectID,
+  measNo,
+  intendedMeasNo,
+  deadCode = NULL,
+  LDStatus
+)
 }
 \arguments{
 \item{subjectID}{character, Specifies subject ID, such as a tree id.}

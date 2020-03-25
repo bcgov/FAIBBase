@@ -5,9 +5,14 @@
 \alias{areaProportion}
 \title{This function is to derive a correction index to account for edge effect}
 \usage{
-areaProportion(bearing, distance, radius, baseShape = "circle",
-  baseRadius = 10, baseCorners = list(c(-50, 50), c(50, 50), c(50,
-  -50), c(-50, -50)))
+areaProportion(
+  bearing,
+  distance,
+  radius,
+  baseShape = "circle",
+  baseRadius = 10,
+  baseCorners = list(c(-50, 50), c(50, 50), c(50, -50), c(-50, -50))
+)
 }
 \arguments{
 \item{bearing}{numeric, The bearing of a tree from a given point of plot (centre or corner).}

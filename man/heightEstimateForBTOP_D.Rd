@@ -6,9 +6,16 @@
 \title{Estimate tree height for a broken top tree when DBH, inside bark diamater at broken top height, height at broken
 are available}
 \usage{
-heightEstimateForBTOP_D(heightBTOP, DIBBTOP, DBH,
-  taperEquationForm = "KBEC", FIZorBEC, species, volMultiplier = 1,
-  SASOriginal = FALSE)
+heightEstimateForBTOP_D(
+  heightBTOP,
+  DIBBTOP,
+  DBH,
+  taperEquationForm = "KBEC",
+  FIZorBEC,
+  species,
+  volMultiplier = 1,
+  SASOriginal = FALSE
+)
 }
 \arguments{
 \item{heightBTOP}{numeric, Height of the broken top.}

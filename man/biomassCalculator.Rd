@@ -6,8 +6,13 @@
 \title{This function is to calculate aboveground biomass for boreal species based on DBH
 or DBH/Height}
 \usage{
-biomassCalculator(species, DBH, heightIncluded = TRUE, height,
-  paperSource = "Lambert2005")
+biomassCalculator(
+  species,
+  DBH,
+  heightIncluded = TRUE,
+  height,
+  paperSource = "Lambert2005"
+)
 }
 \arguments{
 \item{species}{Character string. The species name.}

@@ -5,9 +5,15 @@
 \alias{UTM_Convertor}
 \title{Convert UTM to other coordinate reference system.}
 \usage{
-UTM_Convertor(point_ID, zone, northing, easting,
-  CRS_To = "+proj=aea +lat_1=50 +lat_2=58.5 +lat_0=45 +lon_0=-126 +x_0=1000000\\n                           +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs",
-  class = "sp")
+UTM_Convertor(
+  point_ID,
+  zone,
+  northing,
+  easting,
+ 
+    CRS_To = "+proj=aea +lat_1=50 +lat_2=58.5 +lat_0=45 +lon_0=-126 +x_0=1000000\\n                           +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs",
+  class = "sp"
+)
 }
 \arguments{
 \item{point_ID}{character, Data point ID.}

@@ -4,8 +4,14 @@
 \alias{checkSize_remeas}
 \title{Check the size change of a remeasured subject}
 \usage{
-checkSize_remeas(subjectID, measTime, size, change = "increase",
-  maxChangeRate = NULL, tolerance = 0)
+checkSize_remeas(
+  subjectID,
+  measTime,
+  size,
+  change = "increase",
+  maxChangeRate = NULL,
+  tolerance = 0
+)
 }
 \arguments{
 \item{subjectID}{character, Specifies subject ID, such as a tree id.}

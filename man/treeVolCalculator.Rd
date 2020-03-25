@@ -5,11 +5,22 @@
 \alias{treeVolCalculator}
 \title{Calculate volume for trees}
 \usage{
-treeVolCalculator(FIZorBEC, species, height, DBH,
-  taperEquationForm = "KBEC", volMultiplier = 1, stumpHeight = 0.3,
-  breastHeight = 1.3, UTOPDIB = 10, BTOPEstimateType = NA,
-  BTOPHeight = NA, BTOPDIB = NA, logLengthMatrix = data.table(Log1_L
-  = numeric()), logMinLength = 3)
+treeVolCalculator(
+  FIZorBEC,
+  species,
+  height,
+  DBH,
+  taperEquationForm = "KBEC",
+  volMultiplier = 1,
+  stumpHeight = 0.3,
+  breastHeight = 1.3,
+  UTOPDIB = 10,
+  BTOPEstimateType = NA,
+  BTOPHeight = NA,
+  BTOPDIB = NA,
+  logLengthMatrix = data.table(Log1_L = numeric()),
+  logMinLength = 3
+)
 }
 \arguments{
 \item{FIZorBEC}{character, Specifies which FIZ or BEC (depends on taperEquation) zones the tree located in BC.}

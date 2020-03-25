@@ -4,9 +4,7 @@
 \alias{getSpatial}
 \title{Generic function to derive BEC, TSA and FIZ for given locations}
 \usage{
-getSpatial(pointID, zone, northing, easting, spatialAttribute = "all",
-  mapPath = as.character(NA), mapName = as.character(NA),
-  mapFormat = "gdb")
+getSpatial(pointID, zone, northing, easting, spatialMap, spatialAttribute)
 }
 \arguments{
 \item{pointID}{character, Data point ID.}
@@ -17,20 +15,12 @@ getSpatial(pointID, zone, northing, easting, spatialAttribute = "all",
 
 \item{easting}{integer, UTM easting.}
 
-\item{spatialAttribute}{character, specifies which spatial attribute to be obtained. Must be one of
-"BEC", "TSA", "FIZ", "TFL" and "OWNERSHIP", regardless of lower or upper cases.
-The spatial attribute \code{BEC} and \code{TSA} are
-available at \code{\link[bcmaps]{bec}} and \code{\link[bcmaps]{tsa}}.
-Therefore, for these attributes, \code{mapPath}, \code{mapName} and
-\code{mapFormat} should not be specified. Since \code{FIZ}, \code{TFL} and
-\code{OWNERSHIP} map is not available from any R package.
-The below arguements must be specified.}
+\item{spatialMap}{SpatialPolygonsDataFrame, Spatial map.}
 
-\item{mapPath}{character, Path to map.}
-
-\item{mapName}{character, Map name of the map.}
-
-\item{mapFormat}{character, Map format of the map.}
+\item{spatialAttribute}{character, Specifies which spatial attribute to be obtained.
+Must be one of "BEC", "TSA", "FIZ", "TFL" and "OWNERSHIP",
+regardless of lower or upper cases. Must be consistent with
+\code{spatialMap} arguement.}
 }
 \value{
 Depends on what spatial attribute a function derives.
@@ -61,6 +51,42 @@ For \code{OWNERSHIP}, a table that contains:
 }
 \description{
 This function is to derive \code{BEC}, \code{TSA} or {FIZ} based on an UTM location and BEC map.
+}
+\examples{
+\dontrun{
+ ## for Prince Rupert, Fort Nelson, Prince George, Victoria, Kelowna
+ citylocs <- data.frame(point_ID = c("Prince Rupert", "Prince George", "Victoria", "Kelowna"),
+                        zone = c(9, 10, 10, 11),
+                        northing = c(6019079.41, 5974323.27, 5361626.96, 5528467),
+                        easting = c(415075.83, 516441.65, 475594.70, 321996.76))
+ tsamap <- bcmaps::tsa(class = "sp")
+ city_tsa <- getSpatial(pointID = citylocs$point_ID,
+                        zone = citylocs$zone,
+                        northing = citylocs$northing,
+                        easting = citylocs$easting,
+                        spatialMap = tsamap,
+                        spatialAttribute = "TSA")
+ print(city_tsa)
+ #         pointID tsa          tsa_desc
+ #   Prince Rupert  46     GBR North TSA
+ #   Prince George  24 Prince George TSA
+ #        Victoria  38    Arrowsmith TSA
+ #         Kelowna  22      Okanagan TSA
+
+ becmap <- bcmaps::bec(class = "sp")
+ city_bec <- getSpatial(pointID = citylocs$point_ID,
+                        zone = citylocs$zone,
+                        northing = citylocs$northing,
+                        easting = citylocs$easting,
+                        spatialMap = becmap,
+                        spatialAttribute = "bec")
+ print(city_bec)
+ #        pointID bec_zone bec_sbz bec_var
+ #  Prince Rupert      CWH      vh       2
+ #  Prince George      SBS      mh    <NA>
+ #       Victoria      CDF      mm    <NA>
+ #        Kelowna       PP      xh       1
+}
 }
 \author{
 Yong Luo

@@ -9,11 +9,9 @@
 \usage{
 merge_dupUpdate(x, y, by, updateDup, ...)
 
-\S4method{merge_dupUpdate}{data.table,data.table,character,logical}(x, y,
-  by, updateDup, ...)
+\S4method{merge_dupUpdate}{data.table,data.table,character,logical}(x, y, by, updateDup, ...)
 
-\S4method{merge_dupUpdate}{data.table,data.table,character,missing}(x, y,
-  by, updateDup, ...)
+\S4method{merge_dupUpdate}{data.table,data.table,character,missing}(x, y, by, updateDup, ...)
 }
 \arguments{
 \item{x}{data.table, The first table for merging.}

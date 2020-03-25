@@ -6,8 +6,7 @@
 \title{The function is to generate stem mapping using random spatial distribution of
 stratified size group for non-stem-mapped trees.}
 \usage{
-randomStemMapping(objectID, size, noofGroup = 5, plotSize,
-  mapSize = 10000)
+randomStemMapping(objectID, size, noofGroup = 5, plotSize, mapSize = 10000)
 }
 \arguments{
 \item{objectID}{character, The unique object identifier. Must be unique.}

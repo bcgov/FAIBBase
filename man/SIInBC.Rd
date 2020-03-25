@@ -4,8 +4,7 @@
 \alias{SIInBC}
 \title{Derive site index for a given spatial coverage or a spatial point}
 \usage{
-SIInBC(SIMapPath, spatialCoverage, species = "all",
-  returnClass = "table")
+SIInBC(SIMapPath, spatialCoverage, species = "all", returnClass = "table")
 }
 \arguments{
 \item{SIMapPath}{character, Specifies folder location of species index maps. Please request

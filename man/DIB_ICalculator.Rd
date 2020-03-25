@@ -6,12 +6,25 @@
 \alias{DIB_ICalculator,character,character,character,numeric,numeric,numeric,numeric-method}
 \title{Calculate the inside-bark diameter at a given height}
 \usage{
-DIB_ICalculator(taperEquationForm, FIZorBEC, species, height_I,
-  heightTotal, DBH, volMultiplier)
+DIB_ICalculator(
+  taperEquationForm,
+  FIZorBEC,
+  species,
+  height_I,
+  heightTotal,
+  DBH,
+  volMultiplier
+)
 
-
-  \S4method{DIB_ICalculator}{character,character,character,numeric,numeric,numeric,numeric}(taperEquationForm,
-  FIZorBEC, species, height_I, heightTotal, DBH, volMultiplier)
+\S4method{DIB_ICalculator}{character,character,character,numeric,numeric,numeric,numeric}(
+  taperEquationForm,
+  FIZorBEC,
+  species,
+  height_I,
+  heightTotal,
+  DBH,
+  volMultiplier
+)
 }
 \arguments{
 \item{taperEquationForm}{character, Specifies a taper equation form one of KBEC, KBECQCI, KFIZ3.}

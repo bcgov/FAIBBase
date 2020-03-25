@@ -9,11 +9,9 @@
 \usage{
 lm_group(formula, data, groupBy, ...)
 
-\S4method{lm_group}{character,data.table,character}(formula, data, groupBy,
-  ...)
+\S4method{lm_group}{character,data.table,character}(formula, data, groupBy, ...)
 
-\S4method{lm_group}{character,data.table,missing}(formula, data, groupBy,
-  ...)
+\S4method{lm_group}{character,data.table,missing}(formula, data, groupBy, ...)
 }
 \arguments{
 \item{formula}{character, Linear model formula.}

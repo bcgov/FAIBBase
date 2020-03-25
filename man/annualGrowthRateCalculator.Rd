@@ -5,8 +5,12 @@
 \alias{annualGrowthRateCalculator}
 \title{Calculate annual growth rate}
 \usage{
-annualGrowthRateCalculator(boredDiameter, growthIncrement, growthYear,
-  barkThickness)
+annualGrowthRateCalculator(
+  boredDiameter,
+  growthIncrement,
+  growthYear,
+  barkThickness
+)
 }
 \arguments{
 \item{boredDiameter}{numeric, Diameter at bored height in cm.}

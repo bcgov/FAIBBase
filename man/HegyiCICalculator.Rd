@@ -5,8 +5,16 @@
 \alias{HegyiCICalculator}
 \title{the function to calculate intraspecific and interspecific hegyi competition index both distance and size}
 \usage{
-HegyiCICalculator(objectID, species, coordX, coordY, size, maxRadius,
-  distanceWeight = 1, sizeWeight = 0)
+HegyiCICalculator(
+  objectID,
+  species,
+  coordX,
+  coordY,
+  size,
+  maxRadius,
+  distanceWeight = 1,
+  sizeWeight = 0
+)
 }
 \arguments{
 \item{objectID}{character, The unique object identifier. Must be unique.}

@@ -5,8 +5,15 @@
 \alias{stemMappingExtension}
 \title{Extend stem mapping to a target area and shape.}
 \usage{
-stemMappingExtension(objectID, bearing, distance, plotRadius = 11.28,
-  targetArea = 1, targetShape = "square", randomRotate = FALSE)
+stemMappingExtension(
+  objectID,
+  bearing,
+  distance,
+  plotRadius = 11.28,
+  targetArea = 1,
+  targetShape = "square",
+  randomRotate = FALSE
+)
 }
 \arguments{
 \item{objectID}{character, A object's ID, e.g., a tree's ID.}

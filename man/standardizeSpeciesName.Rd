@@ -9,8 +9,7 @@ the species compatible to biomassCalculation function}
 \usage{
 standardizeSpeciesName(speciesTable, forestInventorySource)
 
-\S4method{standardizeSpeciesName}{data.table,character}(speciesTable,
-  forestInventorySource)
+\S4method{standardizeSpeciesName}{data.table,character}(speciesTable, forestInventorySource)
 }
 \arguments{
 \item{speciesTable}{data table. It must at least have one column species}

@@ -6,13 +6,27 @@
 \alias{taperImplementor,character,data.table,character,character,numeric,numeric,numeric,numeric-method}
 \title{Implement taper equation for a given tree}
 \usage{
-taperImplementor(taperEquationForm, taperCoeffs, FIZorBEC, species,
-  height_I, heightTotal, DBH, volMultiplier)
+taperImplementor(
+  taperEquationForm,
+  taperCoeffs,
+  FIZorBEC,
+  species,
+  height_I,
+  heightTotal,
+  DBH,
+  volMultiplier
+)
 
-
-  \S4method{taperImplementor}{character,data.table,character,character,numeric,numeric,numeric,numeric}(taperEquationForm,
-  taperCoeffs, FIZorBEC, species, height_I, heightTotal, DBH,
-  volMultiplier)
+\S4method{taperImplementor}{character,data.table,character,character,numeric,numeric,numeric,numeric}(
+  taperEquationForm,
+  taperCoeffs,
+  FIZorBEC,
+  species,
+  height_I,
+  heightTotal,
+  DBH,
+  volMultiplier
+)
 }
 \arguments{
 \item{taperEquationForm}{character, Specifies a taper equation form one of KBEC, KBECQCI, KFIZ3.}
