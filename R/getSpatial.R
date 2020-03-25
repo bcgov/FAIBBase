@@ -2,23 +2,15 @@
 #'
 #' @description This function is to derive \code{BEC}, \code{TSA} or {FIZ} based on an UTM location and BEC map.
 #'
-#'
 #' @param pointID character, Data point ID.
 #' @param zone  integer, UTM zone.
 #' @param northing integer, UTM northing.
 #' @param easting integer, UTM easting.
-#' @param spatialAttribute character, specifies which spatial attribute to be obtained. Must be one of
-#'                         "BEC", "TSA", "FIZ", "TFL" and "OWNERSHIP", regardless of lower or upper cases.
-#'                         The spatial attribute \code{BEC} and \code{TSA} are
-#'                         available at \code{\link[bcmaps]{bec}} and \code{\link[bcmaps]{tsa}}.
-#'                         Therefore, for these attributes, \code{mapPath}, \code{mapName} and
-#'                         \code{mapFormat} should not be specified. Since \code{FIZ}, \code{TFL} and
-#'                         \code{OWNERSHIP} map is not available from any R package.
-#'                         The below arguements must be specified.
-#' @param mapPath character, Path to map.
-#' @param mapName character, Map name of the map.
-#' @param mapFormat character, Map format of the map.
-#'
+#' @param spatialMap SpatialPolygonsDataFrame, Spatial map.
+#' @param spatialAttribute character, Specifies which spatial attribute to be obtained.
+#'                                    Must be one of "BEC", "TSA", "FIZ", "TFL" and "OWNERSHIP",
+#'                                    regardless of lower or upper cases. Must be consistent with
+#'                                    \code{spatialMap} arguement.
 #'
 #' @return Depends on what spatial attribute a function derives.
 #'         For \code{BEC}, a table that contains:
@@ -45,25 +37,51 @@
 #'         \item{owner} {owner of land.}
 #'         \item{schedule} {schedule.}
 #'         }
-#'
-#'
-#'
-#'
 #' @importFrom data.table data.table ':=' set
 #' @importFrom dplyr '%>%'
-#' @importFrom bcmaps bec
 #' @importFrom sp spTransform identicalCRS
 #' @importFrom raster intersect
-#' @importFrom rgdal readOGR
+#' @examples
+#' \dontrun{
+#'  ## for Prince Rupert, Fort Nelson, Prince George, Victoria, Kelowna
+#'  citylocs <- data.frame(point_ID = c("Prince Rupert", "Prince George", "Victoria", "Kelowna"),
+#'                         zone = c(9, 10, 10, 11),
+#'                         northing = c(6019079.41, 5974323.27, 5361626.96, 5528467),
+#'                         easting = c(415075.83, 516441.65, 475594.70, 321996.76))
+#'  tsamap <- bcmaps::tsa(class = "sp")
+#'  city_tsa <- getSpatial(pointID = citylocs$point_ID,
+#'                         zone = citylocs$zone,
+#'                         northing = citylocs$northing,
+#'                         easting = citylocs$easting,
+#'                         spatialMap = tsamap,
+#'                         spatialAttribute = "TSA")
+#'  print(city_tsa)
+#'  #         pointID tsa          tsa_desc
+#'  #   Prince Rupert  46     GBR North TSA
+#'  #   Prince George  24 Prince George TSA
+#'  #        Victoria  38    Arrowsmith TSA
+#'  #         Kelowna  22      Okanagan TSA
 #'
+#'  becmap <- bcmaps::bec(class = "sp")
+#'  city_bec <- getSpatial(pointID = citylocs$point_ID,
+#'                         zone = citylocs$zone,
+#'                         northing = citylocs$northing,
+#'                         easting = citylocs$easting,
+#'                         spatialMap = becmap,
+#'                         spatialAttribute = "bec")
+#'  print(city_bec)
+#'  #        pointID bec_zone bec_sbz bec_var
+#'  #  Prince Rupert      CWH      vh       2
+#'  #  Prince George      SBS      mh    <NA>
+#'  #       Victoria      CDF      mm    <NA>
+#'  #        Kelowna       PP      xh       1
+#' }
 #' @export
 #' @rdname getSpatial
 #'
 #' @author Yong Luo
-#'
 getSpatial <- function(pointID, zone, northing, easting,
-                       spatialAttribute = "all", mapPath = as.character(NA),
-                       mapName = as.character(NA), mapFormat = "gdb"){
+                       spatialMap, spatialAttribute){
   if(missing(pointID)){
     pointID <- as.character(1:(max(length(zone), length(northing), length(easting))))
   }
@@ -75,81 +93,63 @@ getSpatial <- function(pointID, zone, northing, easting,
                             easting = easting,
                             class = "sp")
   spatialAttribute <- toupper(spatialAttribute)
-  if(spatialAttribute %in% c("BEC", "TSA", "FIZ", "TFL", "OWNERSHIP")){
-    if(spatialAttribute == "BEC"){
-      spatialMap <- bcmaps::bec(class = "sp")
-    } else if (spatialAttribute == "TSA") {
-      spatialMap <- bcmaps::tsa(class = "sp")
-    } else if (spatialAttribute == "FIZ"){
-      if(is.na(mapPath) | is.na(mapName) | !(mapFormat %in% c("shp", "gdb"))){
-        stop("mapPath, mapName and mapFormat must be correctly specified to derive FIZ.")
-      }
-      gdbpath <- file.path(mapPath, paste(mapName, ".", mapFormat, sep = ""))
-      spatialMap <- rgdal::readOGR(dsn = gdbpath, layer = "forest_inventory_zone")
-    } else if (spatialAttribute == "TFL"){
-      gdbpath <- file.path(mapPath, paste(mapName, ".", mapFormat, sep = ""))
-      spatialMap <- rgdal::readOGR(dsn = gdbpath, layer = "TFL_BusinessView_March2018")
-    } else if (spatialAttribute == "OWNERSHIP"){
-      gdbpath <- file.path(mapPath, paste(mapName, ".", mapFormat, sep = ""))
-      spatialMap <- rgdal::readOGR(dsn = gdbpath, layer = "dissolve_multi")
-    }
-    if(!sp::identicalCRS(spatialMap, pointmap)){
-      pointmap <- suppressWarnings(sp::spTransform(pointmap, crs(spatialMap)))
-    }
+  if(!sp::identicalCRS(spatialMap, pointmap)){
+    pointmap <- suppressWarnings(sp::spTransform(pointmap, crs(spatialMap)))
+  }
 
-    pointmap_new <- raster::intersect(pointmap, spatialMap)
-    pointmap_data <- pointmap_new@data %>% data.table
-    if (spatialAttribute == "BEC"){
-      pointmap_data <- pointmap_data[,.(tempID = point_ID,
-                                        bec_zone = ZONE,
-                                        bec_sbz = SUBZONE,
-                                        bec_var = VARIANT)]
-      pointmap_data <- merge(connectionTable, pointmap_data,
-                             by = "tempID", all.x = TRUE)
-      pointmap_data <- pointmap_data[!duplicated(pointmap_data),]
-      pointmap_data[, tempID := as.numeric(tempID)]
-      pointmap_data <- pointmap_data[order(tempID), .(pointID, bec_zone, bec_sbz, bec_var)]
-    } else if (spatialAttribute == "TSA"){
-      pointmap_data <- pointmap_data[is.na(RETIREMENT_DATE)] # remove the tsa that retired
-      pointmap_data[, WHEN_UPDATED := as.Date(WHEN_UPDATED)]
-      pointmap_data[, last_UPDATED := max(WHEN_UPDATED), by = "point_ID"] # select the most recent updates
-      pointmap_data <- pointmap_data[WHEN_UPDATED == last_UPDATED,]
-      pointmap_data <- pointmap_data[,.(tempID = point_ID,
-                                        tsa = TSA_NUMBER,
-                                        tsa_desc = TSA_NUMBER_DESCRIPTION)]
-      pointmap_data <- merge(connectionTable, pointmap_data,
-                             by = "tempID", all.x = TRUE)
-      pointmap_data <- pointmap_data[!duplicated(pointmap_data),]
-      pointmap_data[, tempID := as.numeric(tempID)]
-      pointmap_data <- pointmap_data[order(tempID), .(pointID, tsa, tsa_desc)]
-    } else if (spatialAttribute == "FIZ"){
-      pointmap_data <- pointmap_data[,.(tempID = point_ID,
-                                        FIZ)]
-      pointmap_data <- merge(connectionTable, pointmap_data,
-                             by = "tempID", all.x = TRUE)
-      pointmap_data <- pointmap_data[!duplicated(pointmap_data),]
-      pointmap_data[, tempID := as.numeric(tempID)]
-      pointmap_data <- pointmap_data[order(tempID), .(pointID, FIZ)]
-    } else if (spatialAttribute == "TFL"){
-      pointmap_data <- pointmap_data[,.(tempID = point_ID,
-                                        TFL = FOREST_FIL)]
-      pointmap_data <- merge(connectionTable, pointmap_data,
-                             by = "tempID", all.x = TRUE)
-      pointmap_data <- pointmap_data[!duplicated(pointmap_data),]
-      pointmap_data[, tempID := as.numeric(tempID)]
-      pointmap_data <- pointmap_data[order(tempID), .(pointID, TFL)]
-    } else if (spatialAttribute == "OWNERSHIP"){
-      pointmap_data <- pointmap_data[,.(tempID = point_ID,
-                                        OWNER = OWN,
-                                        SCHEDULE)]
-      pointmap_data <- merge(connectionTable, pointmap_data,
-                             by = "tempID", all.x = TRUE)
-      pointmap_data <- pointmap_data[!duplicated(pointmap_data),]
-      pointmap_data[, tempID := as.numeric(tempID)]
-      pointmap_data <- pointmap_data[order(tempID), .(pointID, OWNER, SCHEDULE)]
-    }
-    return(pointmap_data)
+  pointmap_new <- raster::intersect(pointmap, spatialMap)
+  pointmap_data <- pointmap_new@data %>% data.table
+  if (spatialAttribute == "BEC"){
+    pointmap_data <- pointmap_data[,.(tempID = point_ID,
+                                      bec_zone = ZONE,
+                                      bec_sbz = SUBZONE,
+                                      bec_var = VARIANT)]
+    pointmap_data <- merge(connectionTable, pointmap_data,
+                           by = "tempID", all.x = TRUE)
+    pointmap_data <- pointmap_data[!duplicated(pointmap_data),]
+    pointmap_data[, tempID := as.numeric(tempID)]
+    pointmap_data <- pointmap_data[order(tempID), .(pointID, bec_zone, bec_sbz, bec_var)]
+  } else if (spatialAttribute == "TSA"){
+    pointmap_data <- pointmap_data[is.na(RETIREMENT_DATE)] # remove the tsa that retired
+    pointmap_data[, WHEN_UPDATED := as.Date(WHEN_UPDATED)]
+    pointmap_data[, last_UPDATED := max(WHEN_UPDATED), by = "point_ID"] # select the most recent updates
+    pointmap_data <- pointmap_data[WHEN_UPDATED == last_UPDATED,]
+    pointmap_data <- pointmap_data[,.(tempID = point_ID,
+                                      tsa = TSA_NUMBER,
+                                      tsa_desc = TSA_NUMBER_DESCRIPTION)]
+    pointmap_data <- merge(connectionTable, pointmap_data,
+                           by = "tempID", all.x = TRUE)
+    pointmap_data <- pointmap_data[!duplicated(pointmap_data),]
+    pointmap_data[, tempID := as.numeric(tempID)]
+    pointmap_data <- pointmap_data[order(tempID), .(pointID, tsa, tsa_desc)]
+  } else if (spatialAttribute == "FIZ"){
+    pointmap_data <- pointmap_data[,.(tempID = point_ID,
+                                      FIZ)]
+    pointmap_data <- merge(connectionTable, pointmap_data,
+                           by = "tempID", all.x = TRUE)
+    pointmap_data <- pointmap_data[!duplicated(pointmap_data),]
+    pointmap_data[, tempID := as.numeric(tempID)]
+    pointmap_data <- pointmap_data[order(tempID), .(pointID, FIZ)]
+  } else if (spatialAttribute == "TFL"){
+    pointmap_data <- pointmap_data[,.(tempID = point_ID,
+                                      TFL = FOREST_FIL)]
+    pointmap_data <- merge(connectionTable, pointmap_data,
+                           by = "tempID", all.x = TRUE)
+    pointmap_data <- pointmap_data[!duplicated(pointmap_data),]
+    pointmap_data[, tempID := as.numeric(tempID)]
+    pointmap_data <- pointmap_data[order(tempID), .(pointID, TFL)]
+  } else if (spatialAttribute == "OWNERSHIP"){
+    pointmap_data <- pointmap_data[,.(tempID = point_ID,
+                                      OWNER = OWN,
+                                      SCHEDULE)]
+    pointmap_data <- merge(connectionTable, pointmap_data,
+                           by = "tempID", all.x = TRUE)
+    pointmap_data <- pointmap_data[!duplicated(pointmap_data),]
+    pointmap_data[, tempID := as.numeric(tempID)]
+    pointmap_data <- pointmap_data[order(tempID), .(pointID, OWNER, SCHEDULE)]
   } else {
     stop("spatialAttribute is not correctly specified.")
   }
+  return(pointmap_data)
 }
+
