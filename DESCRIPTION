@@ -25,6 +25,7 @@ Imports:
   raster,
   rgdal,
   rgeos,
+  sf,
   spatstat
 Suggests: 
     knitr
