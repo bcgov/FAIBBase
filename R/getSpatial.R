@@ -41,6 +41,7 @@
 #' @importFrom dplyr '%>%'
 #' @importFrom sp spTransform identicalCRS
 #' @importFrom raster intersect
+#' @importFrom sf st_as_sf st_intersection
 #' @examples
 #' \dontrun{
 #'  ## for Prince Rupert, Fort Nelson, Prince George, Victoria, Kelowna
@@ -92,13 +93,25 @@ getSpatial <- function(pointID, zone, northing, easting,
                             northing = northing,
                             easting = easting,
                             class = "sp")
+
   spatialAttribute <- toupper(spatialAttribute)
-  if(!sp::identicalCRS(spatialMap, pointmap)){
-    pointmap <- suppressWarnings(sp::spTransform(pointmap, crs(spatialMap)))
+  if(spatialAttribute == "OWNERSHIP"){
+    pointmap <- sf::st_as_sf(pointmap)
+    spatialMap <- sf::st_as_sf(spatialMap)
+    if(st_crs(spatialMap) != st_crs(pointmap)){
+      pointmap <- suppressWarnings(sf::st_transform(pointmap, st_crs(spatialMap)))
+    }
+    pointmap_data <- suppressWarnings(sf::st_intersection(pointmap, spatialMap)) %>%
+      data.table
+  } else {
+    if(!identicalCRS(pointmap, spatialMap)){
+      pointmap <- suppressWarnings(sp::spTransform(pointmap, crs(spatialMap)))
+    }
+    pointmap_tmp <- suppressWarnings(raster::intersect(pointmap, spatialMap))
+    pointmap_data <- pointmap_tmp@data %>% data.table
   }
 
-  pointmap_new <- raster::intersect(pointmap, spatialMap)
-  pointmap_data <- pointmap_new@data %>% data.table
+
   if (spatialAttribute == "BEC"){
     pointmap_data <- pointmap_data[,.(tempID = point_ID,
                                       bec_zone = ZONE,
@@ -139,7 +152,8 @@ getSpatial <- function(pointID, zone, northing, easting,
     pointmap_data[, tempID := as.numeric(tempID)]
     pointmap_data <- pointmap_data[order(tempID), .(pointID, TFL)]
   } else if (spatialAttribute == "OWNERSHIP"){
-    pointmap_data <- pointmap_data[,.(tempID = point_ID,
+    names(pointmap_data) <- toupper(names(pointmap_data))
+    pointmap_data <- pointmap_data[,.(tempID = POINT_ID,
                                       OWNER = OWN,
                                       SCHEDULE)]
     pointmap_data <- merge(connectionTable, pointmap_data,
