@@ -41,7 +41,7 @@
 #' @importFrom dplyr '%>%'
 #' @importFrom sp spTransform identicalCRS
 #' @importFrom raster intersect
-#' @importFrom sf st_as_sf st_intersection
+#' @importFrom sf st_as_sf st_intersection st_crs
 #' @examples
 #' \dontrun{
 #'  ## for Prince Rupert, Fort Nelson, Prince George, Victoria, Kelowna
@@ -99,7 +99,7 @@ getSpatial <- function(pointID, zone, northing, easting,
     pointmap <- sf::st_as_sf(pointmap)
     spatialMap <- sf::st_as_sf(spatialMap)
     if(st_crs(spatialMap) != st_crs(pointmap)){
-      pointmap <- suppressWarnings(sf::st_transform(pointmap, st_crs(spatialMap)))
+      pointmap <- suppressWarnings(sf::st_transform(pointmap, sf::st_crs(spatialMap)))
     }
     pointmap_data <- suppressWarnings(sf::st_intersection(pointmap, spatialMap)) %>%
       data.table
