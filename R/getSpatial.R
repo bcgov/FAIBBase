@@ -105,9 +105,9 @@ getSpatial <- function(pointID, zone, northing, easting,
       data.table
   } else {
     if(!identicalCRS(pointmap, spatialMap)){
-      pointmap_new <- suppressWarnings(sp::spTransform(pointmap, crs(spatialMap)))
+      pointmap <- suppressWarnings(sp::spTransform(pointmap, crs(spatialMap)))
     }
-    pointmap_tmp <- suppressWarnings(raster::intersect(pointmap_new, spatialMap))
+    pointmap_tmp <- suppressWarnings(raster::intersect(pointmap, spatialMap))
     coordata <- pointmap_tmp@coords %>% data.frame
     coordata$newid <- row.names(coordata)
     pointmap_data <- cbind(coordata,
