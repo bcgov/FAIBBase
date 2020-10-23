@@ -109,7 +109,7 @@ getSpatial <- function(pointID, zone, northing, easting,
     }
     pointmap_tmp <- suppressWarnings(raster::intersect(pointmap, spatialMap))
     coordata <- pointmap_tmp@coords %>% data.frame
-    coordata$newid <- row.names(coordata)
+    coordata$newid <- row.names(pointmap_tmp@coords)
     pointmap_data <- cbind(coordata,
                            pointmap_tmp@data) %>% data.table
     pointmap_data[, ':='(point_ID = newid,
