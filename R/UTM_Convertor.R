@@ -37,8 +37,7 @@
 #' @author Yong Luo
 UTM_Convertor <-  function(point_ID, zone, northing,
                            easting,
-                           CRS_To = "+proj=aea +lat_1=50 +lat_2=58.5 +lat_0=45 +lon_0=-126 +x_0=1000000
-                           +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs",
+                           CRS_To = "+proj=aea +lat_0=45 +lon_0=-126 +lat_1=50 +lat_2=58.5 +x_0=1000000 +y_0=0 +datum=NAD83 +units=m +no_defs",
                            class = "sp") {
   UTMTable <- data.table::data.table(point_ID = point_ID,
                                      Zone = zone, Northing = northing,
