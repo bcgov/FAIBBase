@@ -42,6 +42,7 @@
 #' @importFrom sp spTransform identicalCRS
 #' @importFrom raster intersect
 #' @importFrom sf st_as_sf st_intersection st_crs
+#' @importFrom rgeos gBuffer
 #' @examples
 #' \dontrun{
 #'  ## for Prince Rupert, Fort Nelson, Prince George, Victoria, Kelowna
@@ -83,6 +84,7 @@
 #' @author Yong Luo
 getSpatial <- function(pointID, zone, northing, easting,
                        spatialMap, spatialAttribute){
+
   if(missing(pointID)){
     pointID <- as.character(1:(max(length(zone), length(northing), length(easting))))
   }
@@ -93,6 +95,7 @@ getSpatial <- function(pointID, zone, northing, easting,
                             northing = northing,
                             easting = easting,
                             class = "sp")
+  spatialMap <- rgeos::gBuffer(spatialMap, byid = TRUE, width = 0)
 
   spatialAttribute <- toupper(spatialAttribute)
   if(spatialAttribute == "OWNERSHIP"){
