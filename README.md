@@ -4,7 +4,11 @@ If you have bcgovr installed and you use RStudio, click the 'Insert BCDevex Badg
 
 # FAIBBase
 
-Description of package
+<!-- badges: start -->
+
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![img](https://img.shields.io/badge/Lifecycle-Experimental-339999)](https://github.com/bcgov/repomountie/blob/master/doc/lifecycle-badges.md)
+<!-- badges: end --> Description of package
 
 ### Features
 
