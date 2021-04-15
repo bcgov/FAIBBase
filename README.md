@@ -2,8 +2,7 @@
 See https://github.com/BCDevExchange/Our-Project-Docs/blob/master/discussion/projectstates.md
 If you have bcgovr installed and you use RStudio, click the 'Insert BCDevex Badge' Addin. -->
 
-FAIBBase
-========
+# FAIBBase
 
 Description of package
 
