@@ -6,7 +6,8 @@
 #' @param zone  integer, UTM zone.
 #' @param northing integer, UTM northing.
 #' @param easting integer, UTM easting.
-#' @param spatialMap SpatialPolygonsDataFrame, Spatial map.
+#' @param spatialMap SpatialPolygonsDataFrame or sf, Spatial map. The spatial maps are from BC Data catalogue website. You can
+#'                   obtain these maps using bcdata package.
 #' @param spatialAttribute character, Specifies which spatial attribute to be obtained.
 #'                                    Must be one of "BEC", "TSA", "FIZ", "TFL" and "OWNERSHIP",
 #'                                    regardless of lower or upper cases. Must be consistent with
@@ -39,10 +40,7 @@
 #'         }
 #' @importFrom data.table data.table ':=' set
 #' @importFrom dplyr '%>%'
-#' @importFrom sp spTransform identicalCRS
-#' @importFrom raster intersect
-#' @importFrom sf st_as_sf st_intersection st_crs
-#' @importFrom rgeos gBuffer
+#' @importFrom sf st_as_sf st_intersection st_crs st_transform
 #' @examples
 #' \dontrun{
 #'  ## for Prince Rupert, Fort Nelson, Prince George, Victoria, Kelowna
@@ -84,7 +82,7 @@
 #' @author Yong Luo
 getSpatial <- function(pointID, zone, northing, easting,
                        spatialMap, spatialAttribute){
-
+  spatialAttribute <- toupper(spatialAttribute)
   if(missing(pointID)){
     pointID <- as.character(1:(max(length(zone), length(northing), length(easting))))
   }
@@ -95,34 +93,16 @@ getSpatial <- function(pointID, zone, northing, easting,
                             northing = northing,
                             easting = easting,
                             class = "sp")
-  spatialMap <- rgeos::gBuffer(spatialMap, byid = TRUE, width = 0)
 
-  spatialAttribute <- toupper(spatialAttribute)
-  if(spatialAttribute == "OWNERSHIP"){
-    pointmap <- sf::st_as_sf(pointmap)
+  pointmap <- st_as_sf(pointmap)
+  if(!("sf" %in% class(spatialMap))){
     spatialMap <- sf::st_as_sf(spatialMap)
-    if(st_crs(spatialMap) != st_crs(pointmap)){
-      pointmap <- suppressWarnings(sf::st_transform(pointmap, sf::st_crs(spatialMap)))
-    }
-    pointmap_data <- suppressWarnings(sf::st_intersection(pointmap, spatialMap)) %>%
-      data.table
-  } else {
-    if(!identicalCRS(pointmap, spatialMap)){
-      pointmap <- suppressWarnings(sp::spTransform(pointmap, crs(spatialMap)))
-    }
-    pointmap_tmp <- suppressWarnings(raster::intersect(pointmap, spatialMap))
-    coordata <- pointmap_tmp@coords %>% data.frame
-    coordata$newid <- row.names(pointmap_tmp@coords)
-    pointmap_data <- cbind(coordata,
-                           pointmap_tmp@data) %>% data.table
-    pointmap_data[, ':='(point_ID = newid,
-                         Longitude = coords.x1,
-                         Latitude = coords.x2)]
-    pointmap_data[,':='(newid = NULL,
-                        coords.x1 = NULL,
-                        coords.x2 = NULL)]
   }
-
+  if(st_crs(spatialMap) != st_crs(pointmap)){
+    pointmap <- suppressWarnings(sf::st_transform(pointmap, sf::st_crs(spatialMap)))
+  }
+  pointmap_data <- suppressWarnings(sf::st_intersection(pointmap, spatialMap)) %>%
+    data.table
 
   if (spatialAttribute == "BEC"){
     pointmap_data <- pointmap_data[,.(tempID = point_ID,
@@ -149,7 +129,7 @@ getSpatial <- function(pointID, zone, northing, easting,
     pointmap_data <- pointmap_data[order(tempID), .(pointID, tsa, tsa_desc)]
   } else if (spatialAttribute == "FIZ"){
     pointmap_data <- pointmap_data[,.(tempID = point_ID,
-                                      FIZ)]
+                                      FIZ = FOREST_INVENTORY_ZONE)]
     pointmap_data <- merge(connectionTable, pointmap_data,
                            by = "tempID", all.x = TRUE)
     pointmap_data <- pointmap_data[!duplicated(pointmap_data),]
@@ -157,7 +137,7 @@ getSpatial <- function(pointID, zone, northing, easting,
     pointmap_data <- pointmap_data[order(tempID), .(pointID, FIZ)]
   } else if (spatialAttribute == "TFL"){
     pointmap_data <- pointmap_data[,.(tempID = point_ID,
-                                      TFL = FOREST_FIL)]
+                                      TFL = FOREST_FILE_ID)]
     pointmap_data <- merge(connectionTable, pointmap_data,
                            by = "tempID", all.x = TRUE)
     pointmap_data <- pointmap_data[!duplicated(pointmap_data),]

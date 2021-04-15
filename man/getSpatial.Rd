@@ -15,7 +15,8 @@ getSpatial(pointID, zone, northing, easting, spatialMap, spatialAttribute)
 
 \item{easting}{integer, UTM easting.}
 
-\item{spatialMap}{SpatialPolygonsDataFrame, Spatial map.}
+\item{spatialMap}{SpatialPolygonsDataFrame or sf, Spatial map. The spatial maps are from BC Data catalogue website. You can
+obtain these maps using bcdata package.}
 
 \item{spatialAttribute}{character, Specifies which spatial attribute to be obtained.
 Must be one of "BEC", "TSA", "FIZ", "TFL" and "OWNERSHIP",
