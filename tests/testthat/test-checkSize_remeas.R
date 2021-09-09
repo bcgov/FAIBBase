@@ -11,12 +11,20 @@ test_that("checkSize_remeas.R: check the unreasonable remeasured sizes for a giv
   expect_error(checkSize_remeas(subjectID = testdata_org$treeid,
                                 measTime = testdata_org$measuretime,
                                 size = testdata_org$dbh,
-                                tolerance = -0.1))
+                                toleranceMethod = "wrong"))
+  expect_error(checkSize_remeas(subjectID = testdata_org$treeid,
+                                measTime = testdata_org$measuretime,
+                                size = testdata_org$dbh,
+                                toleranceAbs = -1))
+  expect_error(checkSize_remeas(subjectID = testdata_org$treeid,
+                                measTime = testdata_org$measuretime,
+                                size = testdata_org$dbh,
+                                toleranceRel = -1))
   expect_error(checkSize_remeas(subjectID = testdata_org$treeid,
                                 measTime = testdata_org$measuretime,
                                 change = "a",
                                 size = testdata_org$dbh,
-                                tolerance = 0.1))
+                                toleranceAbs = 0.1))
 
   testdata <- rbind(testdata_org,
                     data.table(treeid = "100-1", measuretime = 5,
@@ -33,7 +41,7 @@ test_that("checkSize_remeas.R: check the unreasonable remeasured sizes for a giv
                                 measTime = testdata$measuretime,
                                 change = "increase",
                                 size = testdata$dbh,
-                                tolerance = 0.1)
+                                toleranceAbs = 0.1)
   expect_equivalent(output,
                    data.table(subjectID = "100-2",
                               measTime = 1:5,
@@ -64,26 +72,67 @@ test_that("checkSize_remeas.R: check the unreasonable remeasured sizes for a giv
   testdata[treeid == "100-1" & measuretime == 3, dbh := 8.75] # zero from previous measurement
   testdata[treeid == "100-1" & measuretime == 5, dbh := 16] # decreased 0.25
   testdata[treeid == "100-2" & measuretime == 2, dbh := 9] # decreased 1
-
+# break both tolerance
   output <- checkSize_remeas(subjectID = testdata$treeid,
                              measTime = testdata$measuretime,
                              size = testdata$dbh)
   expect_identical(output$pass,
                    c(NA, TRUE, FALSE, TRUE, FALSE, NA, FALSE, rep(TRUE, 3)))
   expect_identical(output$reason,
-                   c(NA, NA, "break tolerance", NA, "break tolerance", NA,
-                     "break tolerance", rep(NA, 3)))
+                   c(NA, NA, "break both tolerance", NA, "break both tolerance", NA,
+                     "break both tolerance", rep(NA, 3)))
   rm(output)
 
   ## test some failure scenarios for increased sizes based on tolerance 1
   output <- checkSize_remeas(subjectID = testdata$treeid,
                              measTime = testdata$measuretime,
                              size = testdata$dbh,
-                             tolerance = 1)
+                             toleranceAbs = 1)
   expect_identical(output$pass,
                    c(NA, TRUE, TRUE, TRUE, TRUE, NA, FALSE, rep(TRUE, 3)))
   expect_identical(output$reason,
-                   c(rep(NA, 6), "break tolerance", rep(NA, 3)))
+                   c(rep(NA, 6), "break both tolerance", rep(NA, 3)))
+  rm(output)
+
+  output <- checkSize_remeas(subjectID = testdata$treeid,
+                             measTime = testdata$measuretime,
+                             size = testdata$dbh,
+                             toleranceMethod = "either",
+                             toleranceAbs = 0.1,
+                             toleranceRel = 0.01)
+
+  expect_identical(output$pass,
+                   c(NA, TRUE, TRUE, TRUE, FALSE, NA, FALSE, rep(TRUE, 3)))
+  expect_identical(output$reason,
+                   c(NA, NA, NA, NA, "break either tolerance", NA,
+                     "break either tolerance", rep(NA, 3)))
+  rm(output)
+
+  output <- checkSize_remeas(subjectID = testdata$treeid,
+                             measTime = testdata$measuretime,
+                             size = testdata$dbh,
+                             toleranceMethod = "absolute",
+                             toleranceAbs = 0.5,
+                             toleranceRel = 0.01)
+
+  expect_identical(output$pass,
+                   c(NA, TRUE, TRUE, TRUE, TRUE, NA, FALSE, rep(TRUE, 3)))
+  expect_identical(output$reason,
+                   c(NA, NA, NA, NA, NA, NA,
+                     "break absolute tolerance", rep(NA, 3)))
+  rm(output)
+
+  output <- checkSize_remeas(subjectID = testdata$treeid,
+                             measTime = testdata$measuretime,
+                             size = testdata$dbh,
+                             toleranceMethod = "relative",
+                             toleranceRel = 0.05)
+
+  expect_identical(output$pass,
+                   c(NA, TRUE, TRUE, TRUE, TRUE, NA, FALSE, rep(TRUE, 3)))
+  expect_identical(output$reason,
+                   c(NA, NA, NA, NA, NA, NA,
+                     "break relative tolerance", rep(NA, 3)))
   rm(output)
 
   ## test one measurement on one subject
@@ -141,8 +190,8 @@ test_that("checkSize_remeas.R: check the unreasonable remeasured sizes for a giv
                    c(NA, FALSE, TRUE, FALSE, TRUE,
                      NA, rep(TRUE, 2), FALSE, TRUE))
   expect_identical(output$reason,
-                   c(NA, "break tolerance", NA, "break tolerance", NA,
-                     NA, rep(NA, 2), "break tolerance", NA))
+                   c(NA, "break both tolerance", NA, "break both tolerance", NA,
+                     NA, rep(NA, 2), "break both tolerance", NA))
   rm(output)
 
   ## test some failure at tolerance of 0.01
@@ -150,7 +199,7 @@ test_that("checkSize_remeas.R: check the unreasonable remeasured sizes for a giv
                              measTime = testdata$measuretime,
                              change = "decrease",
                              size = testdata$dbh,
-                             tolerance = 0.01)
+                             toleranceAbs = 0.01)
   #    subjectID measTime  size  pass          reason
   # 1:     100-1        1 20.00    NA            <NA>
   # 2:     100-1        2 20.01 FALSE break tolerance
@@ -166,8 +215,8 @@ test_that("checkSize_remeas.R: check the unreasonable remeasured sizes for a giv
                    c(NA, FALSE, TRUE, FALSE, TRUE,
                      NA, rep(TRUE, 2), FALSE, TRUE))
   expect_identical(output$reason,
-                   c(NA, "break tolerance", NA, "break tolerance", NA,
-                     NA, rep(NA, 2), "break tolerance", NA))
+                   c(NA, "break both tolerance", NA, "break both tolerance", NA,
+                     NA, rep(NA, 2), "break both tolerance", NA))
 
   rm(output)
 
@@ -176,25 +225,69 @@ test_that("checkSize_remeas.R: check the unreasonable remeasured sizes for a giv
                              measTime = testdata$measuretime,
                              change = "decrease",
                              size = testdata$dbh,
-                             tolerance = 0.5)
-  # subjectID measTime  size  pass          reason
-  # 1:     100-1        1 20.00    NA            <NA>
-  # 2:     100-1        2 20.01  TRUE            <NA>
-  # 3:     100-1        3 12.50  TRUE            <NA>
-  # 4:     100-1        4 13.50 FALSE break tolerance
-  # 5:     100-1        5  5.00  TRUE            <NA>
-  # 6:     100-2        1 30.00    NA            <NA>
-  # 7:     100-2        2 25.00  TRUE            <NA>
-  # 8:     100-2        3 20.00  TRUE            <NA>
-  # 9:     100-2        4 20.50 FALSE break tolerance
-  #10:     100-2        5 10.00  TRUE            <NA>
+                             toleranceMethod = "either",
+                             toleranceAbs = 0.8,
+                             toleranceRel = 0.02)
+
   expect_identical(output$pass,
                    c(NA, TRUE, TRUE, FALSE, TRUE,
                      NA, rep(TRUE, 2), FALSE, TRUE))
   expect_identical(output$reason,
-                   c(NA, NA, NA, "break tolerance", NA,
-                     NA, rep(NA, 2), "break tolerance", NA))
+                   c(NA, NA, NA, "break either tolerance", NA,
+                     NA, rep(NA, 2), "break either tolerance", NA))
   rm(output)
+
+  output <- checkSize_remeas(subjectID = testdata$treeid,
+                             measTime = testdata$measuretime,
+                             change = "decrease",
+                             size = testdata$dbh,
+                             toleranceMethod = "both",
+                             toleranceAbs = 0.8,
+                             toleranceRel = 0.02)
+
+  expect_identical(output$pass,
+                   c(NA, TRUE, TRUE, FALSE, TRUE,
+                     NA, rep(TRUE, 2), TRUE, TRUE))
+  expect_identical(output$reason,
+                   c(NA, NA, NA, "break both tolerance", NA,
+                     NA, rep(NA, 4)))
+  rm(output)
+
+  output <- checkSize_remeas(subjectID = testdata$treeid,
+                             measTime = testdata$measuretime,
+                             change = "decrease",
+                             size = testdata$dbh,
+                             toleranceMethod = "absolute",
+                             toleranceAbs = 0.8,
+                             toleranceRel = 0.02)
+
+  expect_identical(output$pass,
+                   c(NA, TRUE, TRUE, FALSE, TRUE,
+                     NA, rep(TRUE, 2), TRUE, TRUE))
+  expect_identical(output$reason,
+                   c(NA, NA, NA, "break absolute tolerance", NA,
+                     NA, rep(NA, 4)))
+  rm(output)
+
+  output <- checkSize_remeas(subjectID = testdata$treeid,
+                             measTime = testdata$measuretime,
+                             change = "decrease",
+                             size = testdata$dbh,
+                             toleranceMethod = "relative",
+                             toleranceAbs = 0.8,
+                             toleranceRel = 0.02)
+
+  expect_identical(output$pass,
+                   c(NA, TRUE, TRUE, FALSE, TRUE,
+                     NA, rep(TRUE, 2), FALSE, TRUE))
+  expect_identical(output$reason,
+                   c(NA, NA, NA, "break relative tolerance", NA,
+                     NA, rep(NA, 2), "break relative tolerance", NA))
+  rm(output)
+
+
+
+
 
   ## test the extreme change rate
   testdata <- rbind(data.table(treeid = "100-1", measuretime = 1:5,

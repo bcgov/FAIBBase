@@ -11,8 +11,20 @@
 #'                               to current measurement exceeds the maximum change rate, then the pass of current
 #'                               measurement will be flagged as \code{FALSE}. If missing, this term is set
 #'                               as \code{NULL}.
-#' @param tolerance numeric, Tolerance value (exclusive) to allow measurement error,
-#'                           which is a absolute value.
+#' @param toleranceMethod character, Method to allow acceptable measurement error in an opposite direction
+#'                           of change argument.
+#'                           It must be either \code{both} (break both absolute and relative tolerance),
+#'                           \code{either} (break either absolute or relative tolerance),
+#'                           \code{absolute} (break absolute tolerance only),
+#'                            or \code{relative} (break relative tolerance only).
+#'                           Default is \code{both}.
+#' @param toleranceAbs numeric, Absolute tolerance value (exclusive) to allow measurement error.
+#'                           It must be a a non-negative value.
+#'                           If the change is \code{increase}, the change from current measurement to
+#'                           last measurement will be compared to the negative tolerance value,
+#'                           and vice versa. Default is \code{0} for zero tolerance.
+#' @param toleranceRel numeric, Relative tolerance value (exclusive) to allow measurement error.
+#'                           It must be a a non-negative value.
 #'                           If the change is \code{increase}, the change from current measurement to
 #'                           last measurement will be compared to the negative tolerance value,
 #'                           and vice versa. Default is \code{0} for zero tolerance.
@@ -28,12 +40,27 @@ checkSize_remeas <- function(subjectID,
                              size,
                              change = "increase",
                              maxChangeRate = NULL,
-                             tolerance = 0){
+                             toleranceMethod = "both",
+                             toleranceAbs = 0,
+                             toleranceRel = 0){
   if(!change %in% c("increase", "decrease")){
     stop("change must be correctly defined from increase or decrease.")
   }
-  if(tolerance %<<% 0){
-    stop("tolerance must be defined as a non-negative value.")
+  if(!toleranceMethod %in% c("both", "either", "absolute", "relative")){
+    stop("tolerance must be correctly defined from both, absolute, or relative.")
+  }
+  if(toleranceMethod %in% c("both", "either")){
+    if(toleranceAbs %<<% 0 | toleranceRel %<<% 0){
+      stop("tolerance value must be defined as a non-negative value.")
+    }
+  } else if(toleranceMethod == "absolute"){
+    if(toleranceAbs %<<% 0){
+      stop("tolerance value must be defined as a non-negative value.")
+    }
+  } else {
+    if(toleranceRel %<<% 0){
+      stop("tolerance value must be defined as a non-negative value.")
+    }
   }
   if(is.null(maxChangeRate)){
     maxChangeRate <- Inf
@@ -51,25 +78,62 @@ checkSize_remeas <- function(subjectID,
   thedata[, ':='(Fin_size = shift(size, n = 1L, fill = NA, type = "lead"),
                  Fin_measTime = shift(measTime, n = 1L, fill = NA, type = "lead"))]
   thedata <- thedata[obsid != lastobs,]
-  thedata[, ':='(size_dif = Fin_size - size,
+  thedata[, ':='(size_dif_abs = Fin_size - size,
+                 size_dif_rel = (Fin_size - size)/size,
                  size_changeRate = (Fin_size - size)/(Fin_measTime - measTime))]
-  thedata[, ':='(pass = TRUE, reason = as.character(NA), memo = as.numeric(NA))]
-  thedata[is.na(size_dif) & is.na(Fin_size),
+  thedata[, ':='(pass = TRUE, reason = as.character(NA), memo = as.character(NA))]
+  thedata[is.na(size_dif_abs) & is.na(Fin_size),
           ':='(pass = FALSE, reason = "missing size")]
   if(change == "increase"){
-    thedata[size_dif %<=% (-tolerance),
-            ':='(pass = FALSE, reason = "break tolerance",
-                 memo = size_dif)]
+    if(toleranceMethod == "both"){
+      thedata[size_dif_abs %<=% (-toleranceAbs) &
+                size_dif_rel %<=% (-toleranceRel),
+              ':='(pass = FALSE, reason = "break both tolerance",
+                   memo = paste0("tol_abs: ", size_dif_abs,
+                                 ". tol_rel: ", round(size_dif_rel, 2)))]
+    } else if(toleranceMethod == "either"){
+      thedata[size_dif_abs %<=% (-toleranceAbs) |
+                size_dif_rel %<=% (-toleranceRel),
+              ':='(pass = FALSE, reason = "break either tolerance",
+                   memo = paste0("tol_abs: ", size_dif_abs,
+                                 ". tol_rel: ", round(size_dif_rel, 2)))]
+    } else if(toleranceMethod == "absolute"){
+          thedata[size_dif_abs %<=% (-toleranceAbs),
+            ':='(pass = FALSE, reason = "break absolute tolerance",
+                 memo = paste0("tol_abs: ", size_dif_abs))]
+    } else {
+      thedata[size_dif_rel %<=% (-toleranceRel),
+              ':='(pass = FALSE, reason = "break relative tolerance",
+                   memo = paste0("tol_rel: ", round(size_dif_rel, 2)))]
+    }
     thedata[size_changeRate %>>% maxChangeRate,
             ':='(pass = FALSE, reason = "abnormal change rate",
-                 memo = size_changeRate)]
+                 memo = paste0("change rate: ", round(size_changeRate, 2)))]
   } else if(change == "decrease"){
-    thedata[size_dif %>=% tolerance,
-            ':='(pass = FALSE, reason = "break tolerance",
-                 memo = size_dif)]
+    if(toleranceMethod == "both"){
+      thedata[size_dif_abs %>=% (toleranceAbs) &
+                size_dif_rel %>=% (toleranceRel),
+              ':='(pass = FALSE, reason = "break both tolerance",
+                   memo = paste0("tol_abs: ", size_dif_abs,
+                                 ". tol_rel: ", round(size_dif_rel, 2)))]
+    } else if(toleranceMethod == "either"){
+      thedata[size_dif_abs %>=% (toleranceAbs) |
+                size_dif_rel %>=% (toleranceRel),
+              ':='(pass = FALSE, reason = "break either tolerance",
+                   memo = paste0("tol_abs: ", size_dif_abs,
+                                 ". tol_rel: ", round(size_dif_rel, 2)))]
+    } else if(toleranceMethod == "absolute"){
+      thedata[size_dif_abs %>=% (toleranceAbs),
+              ':='(pass = FALSE, reason = "break absolute tolerance",
+                   memo = paste0("tol_abs: ", size_dif_abs))]
+    } else {
+      thedata[size_dif_rel %>=% (toleranceRel),
+              ':='(pass = FALSE, reason = "break relative tolerance",
+                   memo = paste0("tol_rel: ", size_dif_rel))]
+    }
     thedata[size_changeRate %<<% -maxChangeRate,
             ':='(pass = FALSE, reason = "abnormal change rate",
-                 memo = size_changeRate)]
+                 memo = paste0("change rate: ", round(size_changeRate, 2)))]
   }
   thedata[, measTime := Fin_measTime]
   orgdata <- merge(orgdata, thedata[,.(subjectID, measTime, pass, reason, memo)],

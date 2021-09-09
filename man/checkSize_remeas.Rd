@@ -10,7 +10,9 @@ checkSize_remeas(
   size,
   change = "increase",
   maxChangeRate = NULL,
-  tolerance = 0
+  toleranceMethod = "both",
+  toleranceAbs = 0,
+  toleranceRel = 0
 )
 }
 \arguments{
@@ -28,8 +30,22 @@ to current measurement exceeds the maximum change rate, then the pass of current
 measurement will be flagged as \code{FALSE}. If missing, this term is set
 as \code{NULL}.}
 
-\item{tolerance}{numeric, Tolerance value (exclusive) to allow measurement error,
-which is a absolute value.
+\item{toleranceMethod}{character, Method to allow acceptable measurement error in an opposite direction
+of change argument.
+It must be either \code{both} (break both absolute and relative tolerance),
+\code{either} (break either absolute or relative tolerance),
+\code{absolute} (break absolute tolerance only),
+or \code{relative} (break relative tolerance only).
+Default is \code{both}.}
+
+\item{toleranceAbs}{numeric, Absolute tolerance value (exclusive) to allow measurement error.
+It must be a a non-negative value.
+If the change is \code{increase}, the change from current measurement to
+last measurement will be compared to the negative tolerance value,
+and vice versa. Default is \code{0} for zero tolerance.}
+
+\item{toleranceRel}{numeric, Relative tolerance value (exclusive) to allow measurement error.
+It must be a a non-negative value.
 If the change is \code{increase}, the change from current measurement to
 last measurement will be compared to the negative tolerance value,
 and vice versa. Default is \code{0} for zero tolerance.}
