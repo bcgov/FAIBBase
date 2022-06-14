@@ -14,6 +14,10 @@
 #'                               and \code{square}. The default is \code{square}.
 #' @param randomRotate logical, Defines whether need to random rotate the hexagon when merge into
 #'                              a \code{targetArea}. The default is \code{FALSE}.
+#' @param randomSeed numeric, Defines random seed for the random number generator.
+#'                            This arguement is called when \code{randomRotate} is TRUE.
+#'                            If missing, NA is used, suggesting no random seed is
+#'                            set.
 #'
 #' @return  A table contains the x and y for all the objects in the extended area.
 #'
@@ -21,16 +25,24 @@
 #' \dontrun{
 #' ## randomly generate some trees
 #' library(data.table)
-#' smallplottrees <- data.table(tree_id = 1:20,
-#'                              angle = runif(20, min = 0, max = 360),
-#'                              distance = runif(20, min = 0, max = 5.6))
+#' smallplottrees <- data.table(expand.grid(angle = seq(0, 360, 1),
+#'                               distance = seq(0.1, 5.6, 0.1)))
+#' smallplottrees[, tree_id := 1:nrow(smallplottrees)]
 #' ## extend it to 1 ha
 #' treelist_smallplot <- stemMappingExtension(objectID = smallplottrees$tree_id,
 #'                                            bearing = smallplottrees$angle,
 #'                                            distance = smallplottrees$distance,
 #'                                            plotRadius = 5.64,
 #'                                            randomRotate = TRUE)
-#'
+#' smallplottrees[tree_id %in% treelist_smallplot$objectID,
+#'               inHexigon := "Yes"]
+#' smallplottrees[is.na(inHexigon),
+#'               inHexigon := "No"]
+#' smallplottrees[,':='(x = sin(angle*pi/180)*distance,
+#'                      y = cos(angle*pi/180)*distance)]
+#' library(ggplot2)
+#' thefig <- ggplot(data = smallplottrees, aes(x = x, y = y))+
+#'  geom_point(aes(col = inHexigon))
 #'
 #' bigplottrees <- data.table(tree_id = 1:20,
 #'                            angle = runif(20, min = 0, max = 360),
@@ -48,7 +60,9 @@
 #'
 #'
 #' alltreeplot <- ggplot(data = alltreelist, aes(x, y))+
-#'  geom_point(aes(col = factor(source)))
+#'  geom_point(aes(col = factor(source)))+
+#'  geom_point(data = alltreelist[hexagonID == 0,],
+#'  aes(x, y), col = "red")
 #'
 #' }
 #'
@@ -67,7 +81,8 @@ stemMappingExtension <- function(objectID, bearing, distance,
                                  plotRadius = 11.28, ## large plot of CMI standard 11.28 m
                                  targetArea = 1, ## unit is ha, defines how big the target extended plot
                                  targetShape = "square",
-                                 randomRotate = FALSE){
+                                 randomRotate = FALSE,
+                                 randomSeed = as.numeric(NA)){
   if(tolower(targetShape) == "circle"){
     targetPolygon <- data.table::data.table(angle = seq(0, 359.9, 0.5),
                                             distance = sqrt(targetArea*10000/pi))
@@ -171,6 +186,9 @@ stemMappingExtension <- function(objectID, bearing, distance,
     }
     rm(i)
     if(randomRotate){
+      if(!is.na(randomSeed)){
+        set.seed(randomSeed)
+      }
       newcenters[, ':='(k = 1,
                         hexagonID = 1:(length(x_move)),
                         rotateAngle = sample(0:5, size = length(x_move),
