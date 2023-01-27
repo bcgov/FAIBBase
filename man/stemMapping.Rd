@@ -11,8 +11,9 @@ stemMapping(
   distance,
   plotShape = as.character(NA),
   plotSize,
-  distanceUnit,
-  outputFormat
+  distanceUnit = "m",
+  outputFormat,
+  showID = TRUE
 )
 }
 \arguments{
@@ -29,10 +30,12 @@ and no plot geometry will be produced.}
 If plotShape is rectangle, two numbers must be provided to determine length and width of a
 plot.}
 
-\item{distanceUnit}{character, Defines the unit in the stem mapping.}
+\item{distanceUnit}{character, Defines the unit in the stem mapping. Default is \code{m}.}
 
 \item{outputFormat}{character, Defines whether a \code{table} or a \code{figure} will be returned
 from this function.}
+
+\item{showID}{logical, Specifies whether the objectID will be showed in outputed figure. Default is \code{TRUE}.}
 }
 \value{
 \enumerate{
@@ -43,48 +46,40 @@ from this function.}
 \description{
 The function is to map all the stems in a plot based on bearing and distance.
 }
+\note{
+In the figure, IPC is the integrated plot center with x = 0 and y = 0.
+}
 \examples{
 \dontrun{
 ## randomly generate some trees
-library(data.table)
-smallplottrees <- data.table(expand.grid(angle = seq(0, 360, 1),
-                              distance = seq(0.1, 5.6, 0.1)))
-smallplottrees[, tree_id := 1:nrow(smallplottrees)]
-## extend it to 1 ha
-treelist_smallplot <- stemMappingExtension(objectID = smallplottrees$tree_id,
-                                           bearing = smallplottrees$angle,
-                                           distance = smallplottrees$distance,
-                                           plotRadius = 5.64,
-                                           randomRotate = TRUE)
-smallplottrees[tree_id \%in\% treelist_smallplot$objectID,
-              inHexigon := "Yes"]
-smallplottrees[is.na(inHexigon),
-              inHexigon := "No"]
-smallplottrees[,':='(x = sin(angle*pi/180)*distance,
-                     y = cos(angle*pi/180)*distance)]
-library(ggplot2)
-thefig <- ggplot(data = smallplottrees, aes(x = x, y = y))+
- geom_point(aes(col = inHexigon))
-
 bigplottrees <- data.table(tree_id = 1:20,
                            angle = runif(20, min = 0, max = 360),
                            distance = runif(20, min = 0, max = 11.28))
-## extend it to 1 ha
-treelist_bigplot <- stemMappingExtension(objectID = bigplottrees$tree_id,
+## output a table
+stemmapped_table <- stemMapping(objectID = bigplottrees$tree_id,
                                          bearing = bigplottrees$angle,
                                          distance = bigplottrees$distance,
-                                         plotRadius = 11.28)
-treelist_smallplot[, source := "smallplot"]
-treelist_bigplot[, source := "bigplot"]
+                                         plotShape = "circle",
+                                         plotSize = 11.28,
+                                         distanceUnit = "m",
+                                         outputFormat = "table")
 
+## output a figure
+stemmapped_figure <- stemMapping(objectID = bigplottrees$tree_id,
+                                         bearing = bigplottrees$angle,
+                                         distance = bigplottrees$distance,
+                                         plotShape = "circle",
+                                         plotSize = 11.28,
+                                         distanceUnit = "m",
+                                         outputFormat = "figure",
+                                         showID = TRUE)
 
-alltreelist <- rbind(treelist_bigplot, treelist_smallplot)
-
-
-alltreeplot <- ggplot(data = alltreelist, aes(x, y))+
- geom_point(aes(col = factor(source)))+
- geom_point(data = alltreelist[hexagonID == 0,],
- aes(x, y), col = "red")
+## output a figure without a plot
+stemmapped_figure <- stemMapping(objectID = bigplottrees$tree_id,
+                                         bearing = bigplottrees$angle,
+                                         distance = bigplottrees$distance,
+                                         outputFormat = "figure",
+                                         showID = TRUE)
 
 }
 
