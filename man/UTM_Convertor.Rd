@@ -10,8 +10,8 @@ UTM_Convertor(
   zone,
   northing,
   easting,
- 
-    CRS_To = "+proj=aea +lat_0=45 +lon_0=-126 +lat_1=50 +lat_2=58.5 +x_0=1000000 +y_0=0 +datum=NAD83 +units=m +no_defs",
+  CRS_To =
+    "+proj=aea +lat_0=45 +lon_0=-126 +lat_1=50 +lat_2=58.5 +x_0=1000000 +y_0=0 +datum=NAD83 +units=m +no_defs",
   class = "sp"
 )
 }
