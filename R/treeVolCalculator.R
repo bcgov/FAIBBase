@@ -154,6 +154,14 @@ treeVolCalculator <- function(FIZorBEC, species, height, DBH, taperEquationForm 
     processedData[, DIB_I := DIB_ICalculator(taperEquationForm, FIZorBEC = BEC, species = SP0,
                                              height_I = HT_I, heightTotal = HT, DBH = DBH,
                                              volMultiplier = VOL_MULT)]
+    ## add constrains to make sure all the DIB below 1.3 m is bigger than or equal to DIB_BH
+    ## otherwise, force it to DIB_BH
+    processedData[, DIB_BH := DIB_ICalculator(taperEquationForm, FIZorBEC = BEC, species = SP0,
+                                             height_I = breastHeight, heightTotal = HT, DBH = DBH,
+                                             volMultiplier = VOL_MULT)]
+    processedData[DIB_BH > DIB_I,
+                  DIB_I := DIB_BH]
+
     processedData[, ':='(DIB_STUMP = DIB_I,
                          DIB_I_LAST = DIB_I)]
     processedData[, VOL_STUMP := vcons * (HT_I) * (DIB_STUMP^2)]
@@ -173,7 +181,6 @@ treeVolCalculator <- function(FIZorBEC, species, height, DBH, taperEquationForm 
         processedData[, LOG_BTOP := as.integer(NA)]
       }
     }
-
     newdata <- processedData[0, ]
     ## loop for 10 cm slices
     while(nrow(processedData) > 0){
@@ -181,6 +188,14 @@ treeVolCalculator <- function(FIZorBEC, species, height, DBH, taperEquationForm 
       processedData[, DIB_I := DIB_ICalculator(taperEquationForm, FIZorBEC = BEC, species = SP0,
                                                height_I = HT_I, heightTotal = HT, DBH = DBH,
                                                volMultiplier = VOL_MULT)]
+      ## add constrains to make sure all the DIB below 1.3 m is bigger than or equal to DIB_BH
+      ## otherwise, force it to DIB_BH, see email from Rene on April 27, 2023
+      processedData[, DIB_BH := DIB_ICalculator(taperEquationForm, FIZorBEC = BEC, species = SP0,
+                                                height_I = breastHeight, heightTotal = HT, DBH = DBH,
+                                                volMultiplier = VOL_MULT)]
+      processedData[DIB_BH > DIB_I & HT_I < breastHeight,
+                    DIB_I := DIB_BH]
+
       processedData[, VOL_I := vcons * (0.1) * (DIB_I_LAST^2 + DIB_I^2)/2]
       processedData[, ':='(VOL_WSV = VOL_WSV + VOL_I,
                            DIB_I_LAST = DIB_I)]
