@@ -48,7 +48,7 @@ test_that("checkSize_remeas.R: check the unreasonable remeasured sizes for a giv
                               size = c(10, NA, 20, 25, 30),
                               pass = c(NA, FALSE, TRUE, TRUE, TRUE),
                               reason = c(NA, "missing size", NA, NA, NA),
-                              memo = as.numeric(NA)))
+                              memo = as.character(NA)))
 
 
   #########################################
