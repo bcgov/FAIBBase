@@ -26,6 +26,7 @@ Imports:
   rgdal,
   rgeos,
   sf,
-  spatstat
+  spatstat,
+  stringr
 Suggests: 
     knitr
