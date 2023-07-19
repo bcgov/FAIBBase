@@ -142,6 +142,7 @@ convertSI2SI <- function(spCode_to,
   # second attempt for one to one conversion functions
   if(is.na(site_index)){
     if(spCode_to %in% c("sw", "ss", "se", "sx")){
+      spCode_from_one <- NULL
       if(spCode_to == "sw" & "se" %in% spCode_from){
         spCode_from_one <- "se" # set se as priority
       } else if("sx" %in% spCode_from){
@@ -149,7 +150,9 @@ convertSI2SI <- function(spCode_to,
       } else if("sw" %in% spCode_from){
         spCode_from_one <- "sw"
       }
-      thefunctionName <- paste0("convert_", spCode_to, "_from_", spCode_from_one)
+      if(!is.null(spCode_from_one)){
+        thefunctionName <- paste0("convert_", spCode_to, "_from_", spCode_from_one)
+      }
     } else if (spCode_to %in% c("ba", "bl", "bg", "pw", "ss", "lt", "lw",
                                 "hm", "hw", "pa", "pl", "dr", "py")){
 
