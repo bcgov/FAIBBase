@@ -67,8 +67,12 @@ smallplottrees[is.na(inHexigon),
 smallplottrees[,':='(x = sin(angle*pi/180)*distance,
                      y = cos(angle*pi/180)*distance)]
 library(ggplot2)
-thefig <- ggplot(data = smallplottrees, aes(x = x, y = y))+
+trees_inplot <- ggplot(data = smallplottrees, aes(x = x, y = y))+
  geom_point(aes(col = inHexigon))
+trees_all <- ggplot(data = treelist_smallplot, aes(x = x, y = y))+
+ geom_point(aes(col = hexagonID))
+
+
 
 bigplottrees <- data.table(tree_id = 1:20,
                            angle = runif(20, min = 0, max = 360),

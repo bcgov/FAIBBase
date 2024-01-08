@@ -41,8 +41,12 @@
 #' smallplottrees[,':='(x = sin(angle*pi/180)*distance,
 #'                      y = cos(angle*pi/180)*distance)]
 #' library(ggplot2)
-#' thefig <- ggplot(data = smallplottrees, aes(x = x, y = y))+
+#' trees_inplot <- ggplot(data = smallplottrees, aes(x = x, y = y))+
 #'  geom_point(aes(col = inHexigon))
+#' trees_all <- ggplot(data = treelist_smallplot, aes(x = x, y = y))+
+#'  geom_point(aes(col = hexagonID))
+#'
+#'
 #'
 #' bigplottrees <- data.table(tree_id = 1:20,
 #'                            angle = runif(20, min = 0, max = 360),
@@ -66,10 +70,9 @@
 #'
 #' }
 #'
-#' @importFrom sp SpatialPoints SpatialPointsDataFrame SpatialPolygons Polygons Polygon
+#' @importFrom sf st_as_sf st_area st_cast st_intersection
 #' @importFrom data.table data.table shift
-#' @importFrom rgeos gArea
-#' @importFrom raster intersect
+#' @importFrom dplyr summarise
 #'
 #' @export
 #' @docType methods
@@ -88,8 +91,12 @@ stemMappingExtension <- function(objectID, bearing, distance,
                                             distance = sqrt(targetArea*10000/pi))
     targetPolygon[, ':='(x = sin(angle*pi/180)*distance,
                          y = cos(angle*pi/180)*distance)]
-    targetPolygon <- SpatialPolygons(list(Polygons(list(Polygon(targetPolygon[,.(x, y)])),
-                                                   ID = 0)))
+    # targetPolygon <- SpatialPolygons(list(Polygons(list(Polygon(targetPolygon[,.(x, y)])),
+    #                                                ID = 0)))
+    targetPolygon <- data.frame(targetPolygon) %>%
+      st_as_sf(coords = c("x", "y")) %>%
+      summarise(geometry = st_combine(geometry)) %>%
+      st_cast("POLYGON")
   } else if(tolower(targetShape) == "square"){
     halfLength <- sqrt(targetArea*10000)/2
     targetPolygon <- data.table(matrix(data = c(halfLength, halfLength,
@@ -98,8 +105,12 @@ stemMappingExtension <- function(objectID, bearing, distance,
                                                 -halfLength, halfLength),
                                        byrow = TRUE, nrow = 4))
     names(targetPolygon) <- c("x", "y")
-    targetPolygon <- SpatialPolygons(list(Polygons(list(Polygon(targetPolygon[,.(x, y)])),
-                                                   ID = 0)))
+    # targetPolygon <- SpatialPolygons(list(Polygons(list(Polygon(targetPolygon[,.(x, y)])),
+    #                                                ID = 0)))
+    targetPolygon <- data.frame(targetPolygon) %>%
+      st_as_sf(coords = c("x", "y")) %>%
+      summarise(geometry = st_combine(geometry)) %>%
+      st_cast("POLYGON")
     rm(halfLength)
   }
   initialStemMapping <- data.table::data.table(objectID,
@@ -114,20 +125,27 @@ stemMappingExtension <- function(objectID, bearing, distance,
                                          x = c(0, plotRadius-1),
                                          y = 0,
                                          NOTE = "DUMMY"))
+  initialStemMapping[,':='(x_temp = x,
+                           y_temp = y)]
 
-  initialStemMapping <- SpatialPointsDataFrame(initialStemMapping[,.(x,  y)],
-                                               data = initialStemMapping)
-
+  initialStemMapping <- data.frame(initialStemMapping) %>%
+    st_as_sf(coords = c("x", "y"))
   central_hexagon <- data.table(angle = seq(from = 30, to = 360, by = 60),
                                 distance = plotRadius)
   central_hexagon[, ':='(x = sin(angle*pi/180)*distance,
                          y = cos(angle*pi/180)*distance)]
-  central_hexagon <- Polygons(list(Polygon(data.frame(central_hexagon[,.(x, y)]))), ID = 0)
-  central_hexagon <- SpatialPolygons(list(central_hexagon))
-  initialStemMapping <- raster::intersect(initialStemMapping, central_hexagon)
-  initialStemMapping <- initialStemMapping@data %>% data.table
+  central_hexagon <- data.frame(central_hexagon) %>%
+    st_as_sf(coords = c("x", "y")) %>%
+    summarise(geometry = st_combine(geometry)) %>%
+    st_cast("POLYGON")
+
+  initialStemMapping <- suppressWarnings(sf::st_intersection(initialStemMapping, central_hexagon))
+
+  initialStemMapping <- initialStemMapping %>% data.table
   initialStemMapping <- initialStemMapping[is.na(NOTE),
-                                           .(objectID, distance, bearing, x, y)]
+                                           .(objectID, distance, bearing,
+                                             x = x_temp,
+                                             y = y_temp)]
   if(nrow(initialStemMapping) == 0){
     warning("No tree found in the maximum hexagon, empty table is returned.")
 
@@ -176,10 +194,14 @@ stemMappingExtension <- function(objectID, bearing, distance,
                                  distance = (i*2)*cos(30*pi/180)*plotRadius+0.5*plotRadius)
       donutPolygon <- donutPolygon[, .(x_move = sin(angle*pi/180)*distance,
                                        y_move = cos(angle*pi/180)*distance)]
-      donutPolygon <- SpatialPolygons(list(Polygons(list(Polygon(donutPolygon[,.(x_move, y_move)])),
-                                                    ID = 0)))
-      intersectpolygon <- raster::intersect(donutPolygon, targetPolygon)
-      if(gArea(intersectpolygon) == gArea(targetPolygon)){
+      donutPolygon <- data.frame(donutPolygon) %>%
+        st_as_sf(coords = c("x_move", "y_move")) %>%
+        summarise(geometry = st_combine(geometry)) %>%
+        st_cast("POLYGON")
+
+      intersectpolygon <- sf::st_intersection(donutPolygon, targetPolygon)
+
+      if(st_area(intersectpolygon) == st_area(targetPolygon)){
         needmore <- FALSE
       }
       i <- i+1
@@ -211,27 +233,15 @@ stemMappingExtension <- function(objectID, bearing, distance,
                      rotateAngle = NULL)]
     allstemmap <- rbind(initialStemMapping[,.(hexagonID = 0, objectID, x, y)],
                         newstemmap[,.(hexagonID, objectID, x, y)])
-    allstemmap <- SpatialPointsDataFrame(allstemmap[,.(x,  y)],
-                                         data = allstemmap)
-    allstemmap <- raster::intersect(allstemmap, targetPolygon)
-    allstemmap_a <- raster::intersect(allstemmap, targetPolygon)
-    allstemmap <- allstemmap@data %>% data.table
-    # initial_hexapoints[, k := 1]
-    # allhexagons <- merge(initial_hexapoints, newcenters,
-    #                      by = "k", allow.cartesian = TRUE)
-    # allhexagons <- allhexagons[, .(hexagonID, angle,
-    #                                x = x + x_move, y = y + y_move)]
-    # all_hexagon_list <- list()
-    # all_hexagon_list[[1]] <- Polygons(list(Polygon(data.frame(initial_hexapoints[,.(x, y)]))), ID = 1)
-    #
-    # for(i in 2:max(allhexagons$hexagonID)){
-    #   indihexagon <- allhexagons[hexagonID == i,]
-    #   indihexagon <- indihexagon[order(angle),]
-    #   indi_hexagon_polygons <- Polygons(list(Polygon(data.frame(indihexagon[,.(x, y)]))),
-    #                                     ID = unique(indihexagon$hexagonID))
-    #   all_hexagon_list[[unique(indihexagon$hexagonID)]] <- indi_hexagon_polygons
-    # }
-    # all_hexagons <- SpatialPolygons(all_hexagon_list)
+    allstemmap[,':='(x_temp = x,
+                     y_temp = y)]
+
+    allstemmap <- data.frame(allstemmap) %>%
+      st_as_sf(coords = c("x", "y"))
+    allstemmap <- suppressWarnings(sf::st_intersection(allstemmap, targetPolygon))
+
+    allstemmap <- allstemmap %>% data.table
+    allstemmap <- allstemmap[,.(hexagonID, objectID, x = x_temp, y = y_temp)]
     return(allstemmap)
   }
 }

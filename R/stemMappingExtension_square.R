@@ -51,17 +51,15 @@
 #'
 #' }
 #'
-#' @importFrom sp SpatialPoints SpatialPointsDataFrame SpatialPolygons Polygons Polygon
 #' @importFrom data.table data.table shift
-#' @importFrom rgeos gArea
-#' @importFrom raster intersect
+#' @importFrom sf st_as_sf st_cast st_combine st_intersection
+#' @importFrom dplyr summarise
 #'
 #' @export
 #' @docType methods
 #' @rdname stemMappingExtension_square
 #'
 #' @author Yong Luo
-
 stemMappingExtension_square <- function(objectID, bearing, distance,
                                         plotLength, ## large plot of CMI standard 11.28 m
                                         targetArea = 1, ## unit is ha, defines how big the target extended plot
@@ -74,8 +72,11 @@ stemMappingExtension_square <- function(objectID, bearing, distance,
                                             distance = sqrt(targetArea*10000/pi))
     targetPolygon[, ':='(x = sin(angle*pi/180)*distance,
                          y = cos(angle*pi/180)*distance)]
-    targetPolygon <- SpatialPolygons(list(Polygons(list(Polygon(targetPolygon[,.(x, y)])),
-                                                   ID = 0)))
+    targetPolygon <- data.frame(targetPolygon) %>%
+      st_as_sf(coords = c("x", "y")) %>%
+      summarise(geometry = st_combine(geometry)) %>%
+      st_cast("POLYGON")
+
   } else if(tolower(targetShape) == "square"){
     halfLength <- sqrt(targetArea*10000)/2
     needDonut <- ceiling(halfLength/plotLength)
@@ -85,8 +86,10 @@ stemMappingExtension_square <- function(objectID, bearing, distance,
                                                 -halfLength, halfLength),
                                        byrow = TRUE, nrow = 4))
     names(targetPolygon) <- c("x", "y")
-    targetPolygon <- SpatialPolygons(list(Polygons(list(Polygon(targetPolygon[,.(x, y)])),
-                                                   ID = 0)))
+    targetPolygon <- data.frame(targetPolygon) %>%
+      st_as_sf(coords = c("x", "y")) %>%
+      summarise(geometry = st_combine(geometry)) %>%
+      st_cast("POLYGON")
     rm(halfLength)
   }
   initialStemMapping <- data.table::data.table(objectID,
@@ -128,25 +131,14 @@ stemMappingExtension_square <- function(objectID, bearing, distance,
                    rotateAngle = NULL)]
   allstemmap <- rbind(initialStemMapping[,.(squareID = 0, objectID, x, y)],
                       newstemmap[,.(squareID, objectID, x, y)])
-  allstemmap <- SpatialPointsDataFrame(allstemmap[,.(x,  y)],
-                                       data = allstemmap)
-  allstemmap <- raster::intersect(allstemmap, targetPolygon)
-  allstemmap <- allstemmap@data %>% data.table
-  # initial_hexapoints[, k := 1]
-  # allhexagons <- merge(initial_hexapoints, newcenters,
-  #                      by = "k", allow.cartesian = TRUE)
-  # allhexagons <- allhexagons[, .(squareID, angle,
-  #                                x = x + x_move, y = y + y_move)]
-  # all_hexagon_list <- list()
-  # all_hexagon_list[[1]] <- Polygons(list(Polygon(data.frame(initial_hexapoints[,.(x, y)]))), ID = 1)
-  #
-  # for(i in 2:max(allhexagons$squareID)){
-  #   indihexagon <- allhexagons[squareID == i,]
-  #   indihexagon <- indihexagon[order(angle),]
-  #   indi_hexagon_polygons <- Polygons(list(Polygon(data.frame(indihexagon[,.(x, y)]))),
-  #                                     ID = unique(indihexagon$squareID))
-  #   all_hexagon_list[[unique(indihexagon$squareID)]] <- indi_hexagon_polygons
-  # }
-  # all_hexagons <- SpatialPolygons(all_hexagon_list)
+  allstemmap[,':='(x_temp = x,
+                   y_temp = y)]
+  allstemmap <- data.frame(allstemmap) %>%
+    st_as_sf(coords = c("x", "y"))
+
+  allstemmap <- sf::st_intersection(allstemmap, targetPolygon) %>% data.table
+  allstemmap <- allstemmap[,.(squareID, objectID,
+                              x = x_temp,
+                              y = y_temp)]
   return(allstemmap)
 }

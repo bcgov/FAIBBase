@@ -53,10 +53,7 @@
 #' }
 #'
 #' @note In the figure, IPC is the integrated plot center with x = 0 and y = 0.
-#' @importFrom sp SpatialPoints SpatialPointsDataFrame SpatialPolygons Polygons Polygon
 #' @importFrom data.table data.table shift
-#' @importFrom rgeos gArea
-#' @importFrom raster intersect
 #'
 #' @export
 #' @docType methods

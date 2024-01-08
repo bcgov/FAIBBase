@@ -42,7 +42,8 @@ For \code{FIZ}, a table that contains:
 }
 For \code{TFL}, a table that contains:
 \itemize{
-\item{tfl} {tfl timber farm licenses.}
+\item{tfl} {tfl timber farm licences.}
+\item{tfl_licencee} {tfl timber farm licencee.}
 }
 For \code{OWNERSHIP}, a table that contains:
 \itemize{

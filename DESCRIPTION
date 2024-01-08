@@ -1,6 +1,6 @@
 Package: FAIBBase
 Title: Basic functions for forest mensuration and ecology
-Version: 1.0.0
+Version: 2.0.0
 Authors@R: 
     c(person(given = "Yong",
              family = "Luo",
@@ -23,8 +23,6 @@ Imports:
   sp,
   bcmaps,
   raster,
-  rgdal,
-  rgeos,
   sf,
   spatstat,
   stringr

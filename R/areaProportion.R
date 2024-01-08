@@ -1,4 +1,5 @@
-#' This function is to derive a correction index to account for edge effect
+#' This function is to derive a correction index to account for edge effect when account for
+#' competition effect
 #' @description The correction index is calculated using proportion of overlapped area
 #'              to full circular area.
 #'
@@ -15,12 +16,28 @@
 #'                             upper left, upper right, lower right and lower left corners.
 #'                             Default is \code{list(c(-50, 50), c(50, 50), c(50, -50), c(-50, -50))},
 #'                             which represent a 10000 m2 base area.
-#'
 #' @return A ratio of overlapped area to full circular area.
 #'
-#' @importFrom sp Polygons SpatialPolygons
-#' @importFrom raster intersect
-#' @importFrom rgeos gArea
+#' @examples
+#' \dontrun{
+#' # given a tree is located with bearing of 150 degree and distance of 13 m
+#' # and in a plot of 16.9 m radius circle, in which all the trees are measured.
+#' # assume all the trees within 10m radius have competitive effect on this tree
+#' # hence the trees that are in the plot and within 10m radius from focal tree
+#' # should be corrected based on proportion
+#' # to calculate the proportion
+#' proportion <- areaProportion(bearing = 150,
+#'                              distance = 13,
+#'                              radius = 10,
+#'                              baseShape = "circle",
+#'                              baseRadius = 16.9)
+#'
+#'
+#'
+#' }
+#'
+#' @importFrom sf st_as_sf st_cast st_area st_intersection
+#' @importFrom dplyr summarise
 #'
 #' @export
 #' @docType methods
@@ -55,15 +72,19 @@ areaProportion_indi <- function(bearing,
   focalX <- distance * sin(bearing * pi/180)
   focalY <- distance * cos(bearing * pi/180)
   circlepoints <- seq(0, 2*pi, length.out = 360)
-  focalCircle <- Polygons(list(Polygon(cbind(focalX + radius * sin(circlepoints),
-                                             focalY + radius * cos(circlepoints)))),
-                          ID = 1)
-  focalCircle <- SpatialPolygons(list(focalCircle))
+  focalCircle <- data.frame(x = focalX + radius * sin(circlepoints),
+                            y = focalY + radius * cos(circlepoints)) %>%
+    st_as_sf(coords = c("x", "y")) %>%
+    summarise(geometry = st_combine(geometry)) %>%
+    st_cast("POLYGON")
+
   if(baseShape == "circle"){
-    baseArea <- Polygons(list(Polygon(cbind(baseRadius * sin(circlepoints),
-                                            baseRadius * cos(circlepoints)))),
-                         ID = 1)
-    baseArea <- SpatialPolygons(list(baseArea))
+    baseArea <- data.frame(x = baseRadius * sin(circlepoints),
+                             y = baseRadius * cos(circlepoints)) %>%
+      st_as_sf(coords = c("x", "y")) %>%
+      summarise(geometry = st_combine(geometry)) %>%
+      st_cast("POLYGON")
+
   } else if (baseShape == "rectangle"){
     for(i in 1:4){
       if(i == 1){
@@ -72,16 +93,21 @@ areaProportion_indi <- function(bearing,
         rectangleTable <- rbind(rectangleTable, baseCorners[[i]])
       }
     }
-    baseArea <- Polygons(list(Polygon(rectangleTable)),
-                         ID = 1)
-    baseArea <- SpatialPolygons(list(baseArea))
+    rectangleTable <- data.frame(rectangleTable)
+    names(rectangleTable) <- c("x", "y")
+    baseArea <- rectangleTable %>%
+      st_as_sf(coords = c("x", "y")) %>%
+      summarise(geometry = st_combine(geometry)) %>%
+      st_cast("POLYGON")
+
   } else {
     stop("baseShape must be defined as either circle or rectangle.")
   }
-  overlapArea <- raster::intersect(focalCircle, baseArea)
+  overlapArea <- sf::st_intersection(focalCircle, baseArea)
+
   if(is.null(overlapArea)){
     return(as.numeric(NA))
   } else {
-    return(rgeos::gArea(overlapArea)/rgeos::gArea(focalCircle))
+    return(sf::st_area(overlapArea)/sf::st_area(focalCircle))
   }
 }

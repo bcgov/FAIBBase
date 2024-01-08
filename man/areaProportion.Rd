@@ -3,7 +3,8 @@
 \docType{methods}
 \name{areaProportion}
 \alias{areaProportion}
-\title{This function is to derive a correction index to account for edge effect}
+\title{This function is to derive a correction index to account for edge effect when account for
+competition effect}
 \usage{
 areaProportion(
   bearing,
@@ -39,6 +40,25 @@ A ratio of overlapped area to full circular area.
 \description{
 The correction index is calculated using proportion of overlapped area
 to full circular area.
+}
+\examples{
+\dontrun{
+# given a tree is located with bearing of 150 degree and distance of 13 m
+# and in a plot of 16.9 m radius circle, in which all the trees are measured.
+# assume all the trees within 10m radius have competitive effect on this tree
+# hence the trees that are in the plot and within 10m radius from focal tree
+# should be corrected based on proportion
+# to calculate the proportion
+proportion <- areaProportion(bearing = 150,
+                             distance = 13,
+                             radius = 10,
+                             baseShape = "circle",
+                             baseRadius = 16.9)
+
+
+
+}
+
 }
 \author{
 Yong Luo

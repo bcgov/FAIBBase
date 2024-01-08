@@ -12,7 +12,7 @@ UTM_Convertor(
   easting,
   CRS_To =
     "+proj=aea +lat_0=45 +lon_0=-126 +lat_1=50 +lat_2=58.5 +x_0=1000000 +y_0=0 +datum=NAD83 +units=m +no_defs",
-  class = "sp"
+  class = "sf"
 )
 }
 \arguments{
@@ -28,7 +28,7 @@ UTM_Convertor(
 Default is BC Albers reference system.}
 
 \item{class}{character, Define the class of returned objective. Currently this function supports
-either \code{table} or \code{sp} class. Default is \code{table}.}
+either \code{table} or \code{sf} class. Default is \code{table}.}
 }
 \value{
 Reprojected objective.
@@ -44,7 +44,7 @@ citylocs <- UTM_Convertor(point_ID = c("Prince Rupert", "Prince George",
                           zone = c(9, 10, 10, 11),
                           northing = c(6019079.41, 5974323.27, 5361626.96, 5528467.98),
                           easting = c(415075.83, 516441.65, 475594.70, 321996.76),
-                          class = "sp")
+                          class = "sf")
 bcbdry <- bcmaps::bc_bound(class = "sp")
 plot(bcbdry)
 plot(citylocs, col = "red", size = 10, add = TRUE)

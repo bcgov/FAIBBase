@@ -31,7 +31,8 @@
 #'         }
 #'         For \code{TFL}, a table that contains:
 #'         \itemize{
-#'         \item{tfl} {tfl timber farm licenses.}
+#'         \item{tfl} {tfl timber farm licences.}
+#'         \item{tfl_licencee} {tfl timber farm licencee.}
 #'         }
 #'         For \code{OWNERSHIP}, a table that contains:
 #'         \itemize{
@@ -137,22 +138,24 @@ getSpatial <- function(pointID, zone, northing, easting,
     pointmap_data <- pointmap_data[order(tempID), .(pointID, FIZ)]
   } else if (spatialAttribute == "TFL"){
     pointmap_data <- pointmap_data[,.(tempID = point_ID,
-                                      TFL = FOREST_FILE_ID)]
+                                      TFL = FOREST_FILE_ID,
+                                      TFL_LICENCEE = LICENCEE)]
     pointmap_data <- merge(connectionTable, pointmap_data,
                            by = "tempID", all.x = TRUE)
     pointmap_data <- pointmap_data[!duplicated(pointmap_data),]
     pointmap_data[, tempID := as.numeric(tempID)]
-    pointmap_data <- pointmap_data[order(tempID), .(pointID, TFL)]
+    pointmap_data <- pointmap_data[order(tempID), .(pointID, TFL, TFL_LICENCEE)]
   } else if (spatialAttribute == "OWNERSHIP"){
     names(pointmap_data) <- toupper(names(pointmap_data))
     pointmap_data <- pointmap_data[,.(tempID = POINT_ID,
                                       OWNER = OWN,
-                                      SCHEDULE)]
+                                      SCHEDULE,
+                                      OWNERSHIP_DESCRIPTION)]
     pointmap_data <- merge(connectionTable, pointmap_data,
                            by = "tempID", all.x = TRUE)
     pointmap_data <- pointmap_data[!duplicated(pointmap_data),]
     pointmap_data[, tempID := as.numeric(tempID)]
-    pointmap_data <- pointmap_data[order(tempID), .(pointID, OWNER, SCHEDULE)]
+    pointmap_data <- pointmap_data[order(tempID), .(pointID, OWNER, SCHEDULE, OWNERSHIP_DESCRIPTION)]
   } else {
     stop("spatialAttribute is not correctly specified.")
   }
