@@ -27,7 +27,7 @@
 #' plot(citylocs, col = "red", size = 10, add = TRUE)
 #' }
 #'
-#' @importFrom sf st_crs st_transform st_as_sf
+#' @importFrom sf st_crs st_transform st_as_sf st_coordinates
 #' @importFrom data.table data.table
 #'
 #' @export

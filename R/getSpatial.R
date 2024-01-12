@@ -93,7 +93,7 @@ getSpatial <- function(pointID, zone, northing, easting,
                             zone = zone,
                             northing = northing,
                             easting = easting,
-                            class = "sp")
+                            class = "sf")
 
   pointmap <- st_as_sf(pointmap)
   if(!("sf" %in% class(spatialMap))){
