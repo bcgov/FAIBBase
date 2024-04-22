@@ -2,3 +2,6 @@
 inst/doc
 developmentTools.R
 .Rhistory
+*.xlsx
+*.csv
+*.rds
