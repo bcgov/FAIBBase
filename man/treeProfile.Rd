@@ -41,34 +41,37 @@ See function \code{DIB_ICalculator} for details. Default is KBEC, if missing.}
 A volume table
 }
 \description{
-This function is to calculate tree volume using taper equations on a basis of 10 cm slice. As default, the function is to calculate whole tree volume
-(\code{VOL_WSV}), total merchantable volume (\code{VOL_BELOW_UTOP}) and non-merchantable volume
-(\code{VOL_ABOVE_UTOP}) based on \code{FIZorBEC}, \code{species}, \code{height}, \code{DBH} using Kozak BEC taper equations.
-The function also handles broken top trees by specifying \code{BTOPEstimateType}, \code{BTOPHeight} and \code{BTOPDIB}.
-Accordingly, \code{VOL_BELOW_BTOP} and \code{VOL_ABOVE_BTOP} are produced.
-Lastly, the function derives volume (denoted as \code{LOG_V_X}), merchantable volume
-(denoted as \code{LOG_VM_X}) and top inside bark diameter (denoted as \code{LOG_D_X}) for each log when the \code{logLengthMatrix}
-is provided. For all the scenarioes, stump height (\code{HT_STUMP}), inside bark diameter at stump height (\code{DIB_STUMP}),
-breast height (\code{HT_BH}), inside bark diameter at breast height (\code{DIB_BH}) are generated.
+This function is to produce a tree trunk profile (i.e., inside bark diameter (\code{DIB})).
+And summarize the whole stem volume (\code{VOL_WSV}) and merchantable volume (\code{VOL_MER}).
+}
+\note{
+For the volume between 0 and 0.3, also known as stump volume,
+the compiler calculates the volume as cylinder with the diameter of stump
+height. In the case of the diameter at stump height is less than diameter at breast height,
+the diameter at breast height is used as stump height. It calculates tree volume based on a 10 cm
+slices starting from 0.3 m tall using Smalian’s formula.
 }
 \examples{
 \dontrun{
-treeprofile_a <- treeProfile(FIZ = "CWH",
+treeprofile_a <- treeProfile(FIZorBEC = "CWH",
                              species = "H",
                              height = 27.4,
                              DBH = 30.7,
                              BTOPHeight = 5.6)
-treeprofile_b <- treeProfile(FIZ = "CWH",
+treeprofile_b <- treeProfile(FIZorBEC = "CWH",
                              species = "S",
                              height = 37.3,
                              DBH = 42.3)
-treeprofile_c <- treeProfile(FIZ = "CWH",
+treeprofile_c <- treeProfile(FIZorBEC = "CWH",
                              species = "H",
                              height = 11.6,
                              DBH = 11.2)
 
 }
 
+}
+\seealso{
+\code{\link{treeVolCalculator}}
 }
 \author{
 Yong Luo
