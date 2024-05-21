@@ -1,4 +1,4 @@
-#' Calculate volume for trees
+#' Calculate volume for trees in the ISMCCompiler context
 #'
 #' @description This function is to calculate tree volume using taper equations on a basis of 10 cm slice. As default, the function is to calculate whole tree volume
 #'              (\code{VOL_WSV}), total merchantable volume (\code{VOL_BELOW_UTOP}) and non-merchantable volume

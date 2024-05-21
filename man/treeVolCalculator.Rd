@@ -3,7 +3,7 @@
 \docType{methods}
 \name{treeVolCalculator}
 \alias{treeVolCalculator}
-\title{Calculate volume for trees}
+\title{Calculate volume for trees in the ISMCCompiler context}
 \usage{
 treeVolCalculator(
   FIZorBEC,
