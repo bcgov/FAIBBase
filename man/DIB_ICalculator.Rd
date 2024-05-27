@@ -27,9 +27,12 @@ DIB_ICalculator(
 )
 }
 \arguments{
-\item{taperEquationForm}{character, Specifies a taper equation form one of KBEC, KBECQCI, KFIZ3.}
+\item{taperEquationForm}{character, Specifies which taper equations will be used, currently support \code{KBEC} or \code{KFIZ3}.
+\code{KBEC} is the Kozak's equations (2002 version) based on BEC zone, tree sizes and species.
+\code{KFIZ3} is the equations based on forest inventory zone (FIZ), tree sizes and species.
+Default is KBEC, if missing.}
 
-\item{FIZorBEC}{character, Specifies FIZ or BEC.}
+\item{FIZorBEC}{character, Specifies which FIZ or BEC (depends on \code{taperEquationForm}) zones the tree located in BC.}
 
 \item{species}{character, Species code.}
 

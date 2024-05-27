@@ -3,9 +3,11 @@
 #' @description This function uses taper equation to calculate diameter inside bark at a given height.
 #'              It is equivalent to the subroutine of vol_tree_active_equation in vol_setup macro
 #'
-#' @param taperEquationForm character, Specifies a taper equation form one of KBEC, KBECQCI, KFIZ3.
-#'
-#' @param FIZorBEC character, Specifies FIZ or BEC.
+#' @param taperEquationForm character, Specifies which taper equations will be used, currently support \code{KBEC} or \code{KFIZ3}.
+#'                                     \code{KBEC} is the Kozak's equations (2002 version) based on BEC zone, tree sizes and species.
+#'                                     \code{KFIZ3} is the equations based on forest inventory zone (FIZ), tree sizes and species.
+#'                                     Default is KBEC, if missing.
+#' @param FIZorBEC character, Specifies which FIZ or BEC (depends on \code{taperEquationForm}) zones the tree located in BC.
 #' @param species character, Species code.
 #' @param height_I numeric, Height from ground.
 #' @param heightTotal numeric, Total height of a tree.

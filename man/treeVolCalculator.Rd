@@ -23,7 +23,7 @@ treeVolCalculator(
 )
 }
 \arguments{
-\item{FIZorBEC}{character, Specifies which FIZ or BEC (depends on taperEquation) zones the tree located in BC.}
+\item{FIZorBEC}{character, Specifies which FIZ or BEC (depends on taperEquationForm) zones the tree located in BC.}
 
 \item{species}{character, Tree species, must be BC species code.}
 
@@ -31,8 +31,10 @@ treeVolCalculator(
 
 \item{DBH}{numeric, DBH of the tree in cm.}
 
-\item{taperEquationForm}{character, Specifies which taper equaiton will be used, currently support KFIZ3 or KBEC.
-See function \code{DIB_ICalculator} for details. Default is KBEC, if missing.}
+\item{taperEquationForm}{character, Specifies which taper equations will be used, currently support \code{KBEC} or \code{KFIZ3}.
+\code{KBEC} is the Kozak's equations (2002 version) based on BEC zone, tree sizes and species.
+\code{KFIZ3} is the equations based on forest inventory zone (FIZ), tree sizes and species.
+Default is KBEC, if missing.}
 
 \item{volMultiplier}{numeric, Volume adjustment multiplier. If missing, 1 (no adjustment) is used.}
 
@@ -68,6 +70,9 @@ Lastly, the function derives volume (denoted as \code{LOG_V_X}), merchantable vo
 (denoted as \code{LOG_VM_X}) and top inside bark diameter (denoted as \code{LOG_D_X}) for each log when the \code{logLengthMatrix}
 is provided. For all the scenarioes, stump height (\code{HT_STUMP}), inside bark diameter at stump height (\code{DIB_STUMP}),
 breast height (\code{HT_BH}), inside bark diameter at breast height (\code{DIB_BH}) are generated.
+}
+\seealso{
+\code{DIB_ICalculator}
 }
 \author{
 Yong Luo

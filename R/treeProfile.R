@@ -3,10 +3,12 @@
 #' @description This function is to produce a tree trunk profile (i.e., inside bark diameter (\code{DIB})).
 #'              And summarize the whole stem volume (\code{VOL_WSV}) and merchantable volume (\code{VOL_MER}).
 #'
-#' @param taperEquationForm character, Specifies which taper equaiton will be used, currently support KFIZ3 or KBEC.
-#'        See function \code{DIB_ICalculator} for details. Default is KBEC, if missing.
+#' @param taperEquationForm character, Specifies which taper equations will be used, currently support \code{KBEC} or \code{KFIZ3}.
+#'                                     \code{KBEC} is the Kozak's equations (2002 version) based on BEC zone, tree sizes and species.
+#'                                     \code{KFIZ3} is the equations based on forest inventory zone (FIZ), tree sizes and species.
+#'                                     Default is KBEC, if missing.
 #'
-#' @param FIZorBEC character, Specifies which FIZ or BEC (depends on taperEquation) zones the tree located in BC.
+#' @param FIZorBEC character, Specifies which FIZ or BEC (depends on taperEquationForm) zones the tree located in BC.
 #'
 #' @param species character, Tree species, must be BC species code.
 #'
@@ -117,9 +119,11 @@ treeProfile <- function(taperEquationForm = "KBEC",
                   Comment := "stump height"]
   treeprofiledata[HT_I %==% breastHeight,
                   Comment := "breast height"]
-  merchant <- max(treeprofiledata[DIB_I_next %>=% UTOPDIB]$HT_I)
-  treeprofiledata[HT_I %==% merchant,
-                  Comment := "max merchantable height"]
+  if(nrow(treeprofiledata[DIB_I_next %>=% UTOPDIB]) > 0){
+    merchant <- max(treeprofiledata[DIB_I_next %>=% UTOPDIB]$HT_I)
+    treeprofiledata[HT_I %==% merchant,
+                    Comment := "max merchantable height"]
+  }
   if(!is.na(BTOPHeight)){
     # treat non broken top trees
     treeprofiledata[HT_I %==% (BTOPHeight-0.1),

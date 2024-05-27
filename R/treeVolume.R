@@ -3,22 +3,26 @@
 #' @description This function is to produce a tree trunk profile (i.e., inside bark diameter (\code{DIB})).
 #'              And summarize the whole stem volume (\code{VOL_WSV}) and merchantable volume (\code{VOL_MER}).
 #'
-#' @param taperEquationForm character, Specifies which taper equaiton will be used, currently support KFIZ3 or KBEC.
-#'        See function \code{\link{DIB_ICalculator}} for details. Default is KBEC, if missing.
+#' @param taperEquationForm character, Specifies which taper equations will be used, currently support \code{KBEC} or \code{KFIZ3}.
+#'                                     \code{KBEC} is the Kozak's equations (2002 version) based on BEC zone, tree sizes and species.
+#'                                     \code{KFIZ3} is the equations based on forest inventory zone (FIZ), tree sizes and species.
+#'                                     Default is KBEC, if missing.
 #'
-#' @param FIZorBEC character, Specifies which FIZ or BEC (depends on taperEquation) zones the tree located in BC.
+#' @param FIZorBEC character, Specifies which FIZ or BEC (depends on \code{taperEquationForm}) zones the tree located in BC.
 #'
 #' @param species character, Tree species, must be BC species code.
 #'
 #' @param DBH numeric, DBH of the tree in cm.
 #' @param height numeric, Total tree height in meter.
 #' @param BTOPHeight numeric, Height at broken top in meter. \code{NA} suggests no broken top.
+#'                            If missing, the default is \code{NA}.
 #'
 #' @param volumeName character, Indicates which volume you want to derive. It supports the
 #'                              whole stem volume (\code{WSV}), merchantable volume (\code{MER})
 #'                              or stump volume (\code{STUMP}).
 #'                              The merchantable volume is the whole stem volume minus volume of
 #'                              stump and volume less than minimum utility diameter (\code{UTOPDIB}).
+#'                              If missing, the default is \code{WSV}.
 #' @param stumpHeight numeric, Defines stump height. If missing, 0.3 m is used. It will be called to
 #'                             calculate the merchantable volume.
 #'
