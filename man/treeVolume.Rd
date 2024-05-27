@@ -31,13 +31,15 @@ Default is KBEC, if missing.}
 
 \item{height}{numeric, Total tree height in meter.}
 
-\item{BTOPHeight}{numeric, Height at broken top in meter. \code{NA} suggests no broken top.}
+\item{BTOPHeight}{numeric, Height at broken top in meter. \code{NA} suggests no broken top.
+If missing, the default is \code{NA}.}
 
 \item{volumeName}{character, Indicates which volume you want to derive. It supports the
 whole stem volume (\code{WSV}), merchantable volume (\code{MER})
 or stump volume (\code{STUMP}).
 The merchantable volume is the whole stem volume minus volume of
-stump and volume less than minimum utility diameter (\code{UTOPDIB}).}
+stump and volume less than minimum utility diameter (\code{UTOPDIB}).
+If missing, the default is \code{WSV}.}
 
 \item{stumpHeight}{numeric, Defines stump height. If missing, 0.3 m is used. It will be called to
 calculate the merchantable volume.}
