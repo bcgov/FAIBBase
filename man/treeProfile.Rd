@@ -73,7 +73,7 @@ treeprofile_c <- treeProfile(FIZorBEC = "CWH",
 
 }
 \seealso{
-\code{\link{treeVolCalculator}}
+\code{\link{treeVolume}}
 }
 \author{
 Yong Luo

@@ -52,7 +52,7 @@
 #' @importFrom fpCompare %>>% %<<% %==% %!=% %<=% %>=%
 #' @author Yong Luo
 #'
-#' @seealso \code{\link{treeVolCalculator}}
+#' @seealso \code{\link{treeVolume}}
 #' @export
 #' @docType methods
 #' @rdname treeProfile

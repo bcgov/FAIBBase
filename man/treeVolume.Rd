@@ -51,8 +51,8 @@ calculate the merchantable volume.}
 volume
 }
 \description{
-This function is to produce a tree trunk profile (i.e., inside bark diameter (\code{DIB})).
-And summarize the whole stem volume (\code{VOL_WSV}) and merchantable volume (\code{VOL_MER}).
+This function is to calculate tree volume such as the whole stem volume
+(\code{VOL_WSV}), merchantable volume (\code{VOL_MER}) and stump volume (\code{STUMP}).
 }
 \note{
 For the volume between 0 and 0.3, also known as stump volume,

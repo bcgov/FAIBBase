@@ -1,7 +1,7 @@
 #' Calculate volume for trees
 #'
-#' @description This function is to produce a tree trunk profile (i.e., inside bark diameter (\code{DIB})).
-#'              And summarize the whole stem volume (\code{VOL_WSV}) and merchantable volume (\code{VOL_MER}).
+#' @description This function is to calculate tree volume such as the whole stem volume
+#'              (\code{VOL_WSV}), merchantable volume (\code{VOL_MER}) and stump volume (\code{STUMP}).
 #'
 #' @param taperEquationForm character, Specifies which taper equations will be used, currently support \code{KBEC} or \code{KFIZ3}.
 #'                                     \code{KBEC} is the Kozak's equations (2002 version) based on BEC zone, tree sizes and species.
