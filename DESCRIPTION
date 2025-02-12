@@ -25,6 +25,8 @@ Imports:
   raster,
   sf,
   spatstat,
-  stringr
+  stringr,
+  ggplot2,
+  sf
 Suggests: 
     knitr
