@@ -15,6 +15,7 @@
 #' @return a data table that has five columns, plotNumber, treeNumber, Year, IntraH and InterH
 #'
 #' @importFrom data.table data.table ':='
+#' @importFrom  spatstat.random rpoint
 #'
 #' @note no note
 #'
