@@ -14,6 +14,8 @@ If you have bcgovr installed and you use RStudio, click the 'Insert BCDevex Badg
 
 ### Installation
 
+library(remotes) install_github(“bcgov/FAIBBase”)
+
 ### Usage
 
 #### Example

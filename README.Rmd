@@ -27,6 +27,8 @@ Description of package
 ### Features
 
 ### Installation
+library(remotes)
+install_github("bcgov/FAIBBase")
 
 ### Usage
 
