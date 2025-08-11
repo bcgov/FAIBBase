@@ -279,7 +279,7 @@ setMethod(
 #' @return A coeffients table
 #'
 #' @importFrom data.table ':=' setkey data.table
-#'
+#' @export
 #'
 #'
 #' @docType methods

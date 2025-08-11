@@ -61,7 +61,7 @@ This function is to derive \code{BEC}, \code{TSA} or {FIZ} based on an UTM locat
                         zone = c(9, 10, 10, 11),
                         northing = c(6019079.41, 5974323.27, 5361626.96, 5528467),
                         easting = c(415075.83, 516441.65, 475594.70, 321996.76))
- tsamap <- bcmaps::tsa(class = "sp")
+ tsamap <- bcmaps::tsa()
  city_tsa <- getSpatial(pointID = citylocs$point_ID,
                         zone = citylocs$zone,
                         northing = citylocs$northing,
@@ -75,7 +75,7 @@ This function is to derive \code{BEC}, \code{TSA} or {FIZ} based on an UTM locat
  #        Victoria  38    Arrowsmith TSA
  #         Kelowna  22      Okanagan TSA
 
- becmap <- bcmaps::bec(class = "sp")
+ becmap <- bcmaps::bec()
  city_bec <- getSpatial(pointID = citylocs$point_ID,
                         zone = citylocs$zone,
                         northing = citylocs$northing,
